@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tfrenzy-document-intelligence-platform
+    runtime: node
+    repo: https://github.com/HariKrishnahk1/TFrenzy.git
+    branch: main
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.10.0
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
