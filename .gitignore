@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Uploads directory
+backend/uploads/*
+!backend/uploads/.gitkeep

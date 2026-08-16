@@ -1,0 +1,238 @@
+[
+  {
+    "field": "visit_date",
+    "image": "backend\\debug-crops\\test_row2_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 140,
+    "candidates": [
+      {
+        "x": 5,
+        "y": 63,
+        "width": 630,
+        "height": 45,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\visit_date_candidate_1.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 5,
+        "y": 69,
+        "width": 630,
+        "height": 51,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\visit_date_candidate_2.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 5,
+        "y": 75,
+        "width": 630,
+        "height": 57,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\visit_date_candidate_3.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      }
+    ],
+    "selected": {
+      "x": 5,
+      "y": 69,
+      "width": 630,
+      "height": 51,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\visit_date_candidate_2.png"
+    },
+    "ocrText": "",
+    "ocrConf": 0
+  },
+  {
+    "field": "host_employee_id",
+    "image": "backend\\debug-crops\\test_row2_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 140,
+    "candidates": [
+      {
+        "x": 643,
+        "y": 63,
+        "width": 790,
+        "height": 45,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\host_employee_id_candidate_1.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 643,
+        "y": 69,
+        "width": 790,
+        "height": 51,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\host_employee_id_candidate_2.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 643,
+        "y": 75,
+        "width": 790,
+        "height": 57,
+        "imgW": 1438,
+        "imgH": 140,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\host_employee_id_candidate_3.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      }
+    ],
+    "selected": {
+      "x": 643,
+      "y": 69,
+      "width": 790,
+      "height": 51,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\host_employee_id_candidate_2.png"
+    },
+    "ocrText": "FE",
+    "ocrConf": 0
+  },
+  {
+    "field": "vehicle_number",
+    "image": "backend\\debug-crops\\test_row3_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 130,
+    "candidates": [
+      {
+        "x": 5,
+        "y": 57,
+        "width": 630,
+        "height": 73,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\vehicle_number_candidate_1.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 5,
+        "y": 63,
+        "width": 630,
+        "height": 67,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\vehicle_number_candidate_2.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 5,
+        "y": 69,
+        "width": 630,
+        "height": 61,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\vehicle_number_candidate_3.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      }
+    ],
+    "selected": {
+      "x": 5,
+      "y": 63,
+      "width": 630,
+      "height": 67,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\vehicle_number_candidate_2.png"
+    },
+    "ocrText": "VEHLC",
+    "ocrConf": 0
+  },
+  {
+    "field": "badge_quantity",
+    "image": "backend\\debug-crops\\test_row3_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 130,
+    "candidates": [
+      {
+        "x": 643,
+        "y": 57,
+        "width": 790,
+        "height": 73,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\badge_quantity_candidate_1.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 643,
+        "y": 63,
+        "width": 790,
+        "height": 67,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\badge_quantity_candidate_2.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      },
+      {
+        "x": 643,
+        "y": 69,
+        "width": 790,
+        "height": 61,
+        "imgW": 1438,
+        "imgH": 130,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\badge_quantity_candidate_3.png",
+        "handwriting_visible": true,
+        "handwriting_fully_visible": false,
+        "clipped_top": true,
+        "clipped_bottom": true,
+        "label_visible": true
+      }
+    ],
+    "selected": {
+      "x": 643,
+      "y": 63,
+      "width": 790,
+      "height": 67,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v4\\badge_quantity_candidate_2.png"
+    },
+    "ocrText": "",
+    "ocrConf": 0
+  }
+]

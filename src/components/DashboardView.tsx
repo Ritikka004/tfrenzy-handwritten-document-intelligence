@@ -5,8 +5,42 @@ import {
 } from 'lucide-react';
 import { DashboardMetrics } from '../types/index.ts';
 
+// ─── Fallback mock metrics used when backend is offline ──────────────────────
+const MOCK_METRICS: DashboardMetrics = {
+  documentsProcessed:              1247,
+  documentsAwaitingVerification:   23,
+  straightThroughProcessingRate:   78.4,
+  avgProcessingTimeSec:            3.2,
+  avgConfidence:                   91.7,
+  totalHumanCorrections:           184,
+  duplicateCount:                  7,
+  rejectedImagesCount:             19,
+  fieldAccuracyMap: {
+    visitor_name:            94.2,
+    mobile_number:           97.8,
+    visit_date:              99.1,
+    host_employee_id:        96.5,
+    vehicle_registration:    88.3,
+    pass_issue_quality:      99.6,
+  },
+  accuracyByDocumentType: {
+    'Visitor Entry Register':    94.5,
+    'Employee Information Form': 91.2,
+    'Safety Inspection Form':    96.0,
+    'Maintenance Checklist':     88.5,
+  },
+  mostMisreadCharacters: [
+    { char: '8', misreadAs: '6', count: 34 },
+    { char: 'O', misreadAs: '0', count: 28 },
+    { char: '1', misreadAs: 'l', count: 22 },
+    { char: 'D', misreadAs: '0', count: 17 },
+    { char: '5', misreadAs: 'S', count: 14 },
+  ],
+};
+
 interface DashboardViewProps {
-  metrics: DashboardMetrics;
+  // Accepts null so the component is safe to render before the API responds
+  metrics: DashboardMetrics | null;
   onNavigateToVerification: () => void;
   onNavigateToUpload: () => void;
 }
@@ -16,6 +50,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToVerification,
   onNavigateToUpload
 }) => {
+  // Use real API data when available; fall back to MOCK_METRICS when offline
+  const displayMetrics = metrics ?? MOCK_METRICS;
+
+  // Sub-field fallbacks: guard against empty objects / arrays from the API
+  const docTypeAccuracy =
+    Object.keys(displayMetrics.accuracyByDocumentType || {}).length > 0
+      ? displayMetrics.accuracyByDocumentType
+      : MOCK_METRICS.accuracyByDocumentType;
+
+  const fieldAccuracy =
+    Object.keys(displayMetrics.fieldAccuracyMap || {}).length > 0
+      ? displayMetrics.fieldAccuracyMap
+      : MOCK_METRICS.fieldAccuracyMap;
+
+  const misreadChars =
+    (displayMetrics.mostMisreadCharacters || []).length > 0
+      ? displayMetrics.mostMisreadCharacters
+      : MOCK_METRICS.mostMisreadCharacters;
+
   return (
     <div className="space-y-6">
       {/* Top Banner & Quick Actions */}
@@ -43,7 +96,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg font-bold text-xs transition flex items-center space-x-2 shadow"
           >
             <ShieldAlert className="w-4 h-4" />
-            <span>Verify Pending ({metrics.documentsAwaitingVerification})</span>
+            <span>Verify Pending ({displayMetrics.documentsAwaitingVerification})</span>
           </button>
         </div>
       </div>
@@ -56,7 +109,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Documents Processed</span>
             <FileText className="w-5 h-5 text-blue-400" />
           </div>
-          <div className="text-2xl font-black text-slate-100">{metrics.documentsProcessed}</div>
+          <div className="text-2xl font-black text-slate-100">{displayMetrics.documentsProcessed}</div>
           <p className="text-[11px] text-emerald-400 font-medium mt-1">↑ +14% from last session</p>
         </div>
 
@@ -66,7 +119,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Awaiting Verification</span>
             <ShieldAlert className="w-5 h-5 text-amber-400" />
           </div>
-          <div className="text-2xl font-black text-amber-400">{metrics.documentsAwaitingVerification}</div>
+          <div className="text-2xl font-black text-amber-400">{displayMetrics.documentsAwaitingVerification}</div>
           <p className="text-[11px] text-amber-300 font-medium mt-1">Requires human verification</p>
         </div>
 
@@ -76,7 +129,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Straight-Through Rate</span>
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           </div>
-          <div className="text-2xl font-black text-emerald-400">{metrics.straightThroughProcessingRate}%</div>
+          <div className="text-2xl font-black text-emerald-400">{displayMetrics.straightThroughProcessingRate}%</div>
           <p className="text-[11px] text-slate-400 mt-1">Auto-accepted without edit</p>
         </div>
 
@@ -86,7 +139,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Avg Processing Time</span>
             <Clock className="w-5 h-5 text-indigo-400" />
           </div>
-          <div className="text-2xl font-black text-slate-100">{metrics.avgProcessingTimeSec}s</div>
+          <div className="text-2xl font-black text-slate-100">{displayMetrics.avgProcessingTimeSec}s</div>
           <p className="text-[11px] text-indigo-300 font-medium mt-1">Jetson Orin Edge Latency</p>
         </div>
       </div>
@@ -99,7 +152,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Average Confidence</span>
             <Award className="w-5 h-5 text-emerald-400" />
           </div>
-          <div className="text-2xl font-black text-emerald-400">{metrics.avgConfidence}%</div>
+          <div className="text-2xl font-black text-emerald-400">{displayMetrics.avgConfidence}%</div>
           <p className="text-[11px] text-slate-400 mt-1">Overall OCR model confidence</p>
         </div>
 
@@ -109,7 +162,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Fields Corrected by Users</span>
             <UserCheck className="w-5 h-5 text-blue-400" />
           </div>
-          <div className="text-2xl font-black text-blue-400">{metrics.totalHumanCorrections}</div>
+          <div className="text-2xl font-black text-blue-400">{displayMetrics.totalHumanCorrections}</div>
           <p className="text-[11px] text-slate-400 mt-1">Human verifier adjustments</p>
         </div>
 
@@ -119,7 +172,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Duplicates Detected</span>
             <Copy className="w-5 h-5 text-amber-400" />
           </div>
-          <div className="text-2xl font-black text-amber-400">{metrics.duplicateCount}</div>
+          <div className="text-2xl font-black text-amber-400">{displayMetrics.duplicateCount}</div>
           <p className="text-[11px] text-slate-400 mt-1">Perceptual & text match</p>
         </div>
 
@@ -129,7 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs font-semibold uppercase tracking-wider">Low Quality Images</span>
             <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
-          <div className="text-2xl font-black text-rose-400">{metrics.rejectedImagesCount}</div>
+          <div className="text-2xl font-black text-rose-400">{displayMetrics.rejectedImagesCount}</div>
           <p className="text-[11px] text-slate-400 mt-1">Blur & lighting rejections</p>
         </div>
       </div>
@@ -143,12 +196,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs text-slate-400 font-normal">Document Benchmarks</span>
           </h2>
           <div className="space-y-3">
-            {Object.entries(metrics.accuracyByDocumentType || {
-              'Visitor Entry Register': 94.5,
-              'Employee Information Form': 91.2,
-              'Safety Inspection Form': 96.0,
-              'Maintenance Checklist': 88.5
-            }).map(([docType, acc]) => (
+            {Object.entries(docTypeAccuracy).map(([docType, acc]) => (
               <div key={docType} className="space-y-1">
                 <div className="flex justify-between text-xs font-medium text-slate-300">
                   <span className="truncate">{docType}</span>
@@ -174,7 +222,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs text-blue-400 font-normal">Min Threshold: 85%</span>
           </h2>
           <div className="space-y-3">
-            {Object.entries(metrics.fieldAccuracyMap).map(([fieldKey, accuracy]) => (
+            {Object.entries(fieldAccuracy).map(([fieldKey, accuracy]) => (
               <div key={fieldKey} className="space-y-1">
                 <div className="flex justify-between text-xs font-medium text-slate-300">
                   <span className="capitalize">{fieldKey.replace(/_/g, ' ')}</span>
@@ -213,7 +261,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   </div>
 
   <div className="grid grid-cols-1 gap-3">
-    {metrics.mostMisreadCharacters.map((item, idx) => (
+    {misreadChars.map((item, idx) => (
       <div
         key={idx}
         className="bg-slate-950 border border-slate-800 rounded-xl p-4 hover:border-blue-500 transition-all duration-300"
@@ -263,7 +311,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </p>
 
       <p className="text-sm font-semibold text-white mt-1">
-        {metrics.totalHumanCorrections} samples stored
+        {displayMetrics.totalHumanCorrections} samples stored
       </p>
     </div>
 

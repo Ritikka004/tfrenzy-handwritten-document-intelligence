@@ -1,0 +1,157 @@
+{
+  "generated_at": "2026-08-10T14:09:59.110Z",
+  "pipeline_stage": "staging_validation",
+  "database_ts_bboxes_loaded": true,
+  "tesseract_ocr_engine": "Tesseract.js",
+  "coordinate_transformation": "percent→pixel via imageCropper.ts formula",
+  "fields": [
+    {
+      "field": "visit_date",
+      "label": "Date of Visit",
+      "field_type": "date",
+      "bbox_percent": {
+        "x": 5.35,
+        "y": 30,
+        "width": 30.25,
+        "height": 70
+      },
+      "bbox_pixel": {
+        "x": 77,
+        "y": 42,
+        "width": 435,
+        "height": 98
+      },
+      "crop_dimensions": {
+        "width": 435,
+        "height": 98
+      },
+      "crop_success": true,
+      "crop_path": "./backend/debug-crops/final-e2e-validation/visit_date_crop.png",
+      "ocr_raw_text": "Date of Visit\n09/]og]202¢",
+      "ocr_confidence": "77.00",
+      "normalized_value": "Date of Visit\n09/]og]202¢",
+      "expected_value": "09/08/2026",
+      "regex_validation": false,
+      "exact_match": false,
+      "validation_notes": "Does not match regex: ^\\d{4}-\\d{2}-\\d{2}$",
+      "ocr_success": true,
+      "normalized_success": false,
+      "exact_match_success": false,
+      "pass_fail": "PASS_WITH_CONFIDENCE",
+      "ready_for_production": false
+    },
+    {
+      "field": "host_employee_id",
+      "label": "Host Employee ID",
+      "field_type": "employee_id",
+      "bbox_percent": {
+        "x": 50.7,
+        "y": 25,
+        "width": 25.24,
+        "height": 75
+      },
+      "bbox_pixel": {
+        "x": 729,
+        "y": 35,
+        "width": 363,
+        "height": 105
+      },
+      "crop_dimensions": {
+        "width": 363,
+        "height": 105
+      },
+      "crop_success": true,
+      "crop_path": "./backend/debug-crops/final-e2e-validation/host_employee_id_crop.png",
+      "ocr_raw_text": "Host Employee ID\nEMP 1234",
+      "ocr_confidence": "87.00",
+      "normalized_value": "EMP1234",
+      "expected_value": "EMP1234",
+      "regex_validation": true,
+      "exact_match": true,
+      "validation_notes": "MATCHES EXPECTED",
+      "ocr_success": true,
+      "normalized_success": true,
+      "exact_match_success": true,
+      "pass_fail": "PASS",
+      "ready_for_production": true
+    },
+    {
+      "field": "vehicle_number",
+      "label": "Vehicle Registration No.",
+      "field_type": "vehicle_number",
+      "bbox_percent": {
+        "x": 5,
+        "y": 47,
+        "width": 44,
+        "height": 7
+      },
+      "bbox_pixel": {
+        "x": 72,
+        "y": 66,
+        "width": 633,
+        "height": 10
+      },
+      "crop_dimensions": {
+        "width": 633,
+        "height": 10
+      },
+      "crop_success": true,
+      "crop_path": "./backend/debug-crops/final-e2e-validation/vehicle_number_crop.png",
+      "ocr_raw_text": "WITT IG TZN TOLITIQAALIVI IZ,",
+      "ocr_confidence": "3.00",
+      "normalized_value": "WITTIGTZNTOLITIQAALIVIIZ,",
+      "expected_value": "TN09BX1234",
+      "regex_validation": false,
+      "exact_match": false,
+      "validation_notes": "Does not match regex: ^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$",
+      "ocr_success": false,
+      "normalized_success": false,
+      "exact_match_success": false,
+      "pass_fail": "NEEDS_REVIEW",
+      "ready_for_production": false
+    },
+    {
+      "field": "badge_quantity",
+      "label": "Passes Issued Quantity",
+      "field_type": "quantity",
+      "bbox_percent": {
+        "x": 50,
+        "y": 47,
+        "width": 44,
+        "height": 7
+      },
+      "bbox_pixel": {
+        "x": 719,
+        "y": 66,
+        "width": 633,
+        "height": 10
+      },
+      "crop_dimensions": {
+        "width": 633,
+        "height": 10
+      },
+      "crop_success": true,
+      "crop_path": "./backend/debug-crops/final-e2e-validation/badge_quantity_crop.png",
+      "ocr_raw_text": "1 FF cASHTS ISS LUrkYy YvJuaoaoaiaavwv",
+      "ocr_confidence": "30.00",
+      "normalized_value": "1",
+      "expected_value": "02",
+      "regex_validation": true,
+      "exact_match": false,
+      "validation_notes": "Expected: 02",
+      "ocr_success": false,
+      "normalized_success": true,
+      "exact_match_success": false,
+      "pass_fail": "NEEDS_REVIEW",
+      "ready_for_production": false
+    }
+  ],
+  "validation_summary": {
+    "visit_date_ready": false,
+    "host_employee_id_ready": true,
+    "vehicle_number_status": "manual_confirmation_fallback",
+    "badge_quantity_status": "manual_confirmation_fallback",
+    "overall_staging_ready": false,
+    "recommendation": "Application ready for staging with limitations. visit_date and host_employee_id working correctly."
+  }
+}

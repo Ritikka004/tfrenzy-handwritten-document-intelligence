@@ -23,8 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem('tfrenzy_user');
     return saved ? JSON.parse(saved) : {
       id: 'usr-001',
-      email: 'sarah.connor@tfrenzy.ai',
-      fullName: 'Sarah Connor',
+      email: 'rithika@tfrenzy.ai',
+      fullName: 'Rithika',
       role: 'admin'
     };
   });

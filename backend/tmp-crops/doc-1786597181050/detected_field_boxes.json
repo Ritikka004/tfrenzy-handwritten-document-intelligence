@@ -1,0 +1,38 @@
+{
+  "visitor_name": {
+    "minX": 58,
+    "minY": 120,
+    "boxW": 663,
+    "boxH": 51
+  },
+  "mobile_number": {
+    "minX": 720,
+    "minY": 120,
+    "boxW": 691,
+    "boxH": 51
+  },
+  "visit_date": {
+    "minX": 57,
+    "minY": 170,
+    "boxW": 410,
+    "boxH": 61
+  },
+  "host_employee_id": {
+    "minX": 734,
+    "minY": 170,
+    "boxW": 677,
+    "boxH": 61
+  },
+  "vehicle_number": {
+    "minX": 56,
+    "minY": 230,
+    "boxW": 427,
+    "boxH": 71
+  },
+  "badge_quantity": {
+    "minX": 734,
+    "minY": 230,
+    "boxW": 677,
+    "boxH": 71
+  }
+}

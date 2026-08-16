@@ -1,0 +1,247 @@
+[
+  {
+    "field": "mobile_number",
+    "variant": "original",
+    "ocrText": "965423210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "grayscale",
+    "ocrText": "96543210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "upscale2x",
+    "ocrText": "936542210",
+    "rawConfidence": 7,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "grayscale_upscale",
+    "ocrText": "96542210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "grayscale_contrast",
+    "ocrText": "96542210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "grayscale_thresh",
+    "ocrText": "96543210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "mobile_number",
+    "variant": "grayscale_upscale_thresh",
+    "ocrText": "65423210",
+    "rawConfidence": 0,
+    "expected": "916543210"
+  },
+  {
+    "field": "visit_date",
+    "variant": "original",
+    "ocrText": "0",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "grayscale",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "upscale2x",
+    "ocrText": "/",
+    "rawConfidence": 74,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "grayscale_upscale",
+    "ocrText": "/ /",
+    "rawConfidence": 33,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "grayscale_contrast",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "grayscale_thresh",
+    "ocrText": "/",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "variant": "grayscale_upscale_thresh",
+    "ocrText": "0 /",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "original",
+    "ocrText": "EE",
+    "rawConfidence": 15,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "grayscale",
+    "ocrText": "EB",
+    "rawConfidence": 14,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "upscale2x",
+    "ocrText": "S",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "grayscale_upscale",
+    "ocrText": "S",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "grayscale_contrast",
+    "ocrText": "EB",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "grayscale_thresh",
+    "ocrText": "HEE",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "variant": "grayscale_upscale_thresh",
+    "ocrText": "E",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "original",
+    "ocrText": "V Y N",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "grayscale",
+    "ocrText": "V EL N",
+    "rawConfidence": 2,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "upscale2x",
+    "ocrText": "V  S N",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "grayscale_upscale",
+    "ocrText": "V GL N",
+    "rawConfidence": 8,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "grayscale_contrast",
+    "ocrText": "V EL N",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "grayscale_thresh",
+    "ocrText": "V R N",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "variant": "grayscale_upscale_thresh",
+    "ocrText": "V R N",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "original",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "grayscale",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "upscale2x",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "grayscale_upscale",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "grayscale_contrast",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "grayscale_thresh",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  },
+  {
+    "field": "badge_quantity",
+    "variant": "grayscale_upscale_thresh",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "9"
+  }
+]

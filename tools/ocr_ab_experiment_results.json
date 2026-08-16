@@ -1,0 +1,236 @@
+{
+  "results": [
+    {
+      "field": "mobile_number",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "965423210",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "mobile_number",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "| gRF65423210",
+      "rawConfidence": 58,
+      "appConfidence": 0.58
+    },
+    {
+      "field": "mobile_number",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "Cl egarerate HI",
+      "rawConfidence": 11,
+      "appConfidence": 0.11
+    },
+    {
+      "field": "mobile_number",
+      "test": "D (with-preprocess)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "965423210",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "visit_date",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "0",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "visit_date",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "ae Is If eg Vie",
+      "rawConfidence": 13,
+      "appConfidence": 0.13
+    },
+    {
+      "field": "visit_date",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "Rh a.",
+      "rawConfidence": 39,
+      "appConfidence": 0.39
+    },
+    {
+      "field": "visit_date",
+      "test": "D (with-preprocess)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "0",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "host_employee_id",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "EE",
+      "rawConfidence": 15,
+      "appConfidence": 0.15
+    },
+    {
+      "field": "host_employee_id",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "EE",
+      "rawConfidence": 15,
+      "appConfidence": 0.15
+    },
+    {
+      "field": "host_employee_id",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "CERES",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "host_employee_id",
+      "test": "D (with-preprocess)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "EE",
+      "rawConfidence": 15,
+      "appConfidence": 0.15
+    },
+    {
+      "field": "vehicle_number",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "V Y N",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "vehicle_number",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "Vehicle ey No.",
+      "rawConfidence": 73,
+      "appConfidence": 0.73
+    },
+    {
+      "field": "vehicle_number",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "| Vetiele Reaistrationna:",
+      "rawConfidence": 25,
+      "appConfidence": 0.25
+    },
+    {
+      "field": "vehicle_number",
+      "test": "D (with-preprocess)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "V Y N",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "badge_quantity",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    },
+    {
+      "field": "badge_quantity",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "Passes Issued Quantity |",
+      "rawConfidence": 84,
+      "appConfidence": 0.84
+    },
+    {
+      "field": "badge_quantity",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "| rassesissued quantity |",
+      "rawConfidence": 23,
+      "appConfidence": 0.23
+    },
+    {
+      "field": "badge_quantity",
+      "test": "D (with-preprocess)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "",
+      "rawConfidence": 0,
+      "appConfidence": 0
+    }
+  ],
+  "best": {
+    "mobile_number": {
+      "field": "mobile_number",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "| gRF65423210",
+      "rawConfidence": 58,
+      "appConfidence": 0.58,
+      "score": 0.6549999999999999
+    },
+    "visit_date": {
+      "field": "visit_date",
+      "test": "C (single-word)",
+      "psm": "8",
+      "whitelist": false,
+      "ocrText": "Rh a.",
+      "rawConfidence": 39,
+      "appConfidence": 0.39,
+      "score": 0.39
+    },
+    "host_employee_id": {
+      "field": "host_employee_id",
+      "test": "A (prod)",
+      "psm": "7",
+      "whitelist": true,
+      "ocrText": "EE",
+      "rawConfidence": 15,
+      "appConfidence": 0.15,
+      "score": 0.15
+    },
+    "vehicle_number": {
+      "field": "vehicle_number",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "Vehicle ey No.",
+      "rawConfidence": 73,
+      "appConfidence": 0.73,
+      "score": 0.88
+    },
+    "badge_quantity": {
+      "field": "badge_quantity",
+      "test": "B (no-whitelist)",
+      "psm": "7",
+      "whitelist": false,
+      "ocrText": "Passes Issued Quantity |",
+      "rawConfidence": 84,
+      "appConfidence": 0.84,
+      "score": 0.84
+    }
+  }
+}

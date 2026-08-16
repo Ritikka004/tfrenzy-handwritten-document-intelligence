@@ -39,7 +39,7 @@ class SystemDatabase {
     const adminUser: User = {
       id: 'usr-001',
       email: 'admin@tfrenzy.ai',
-      name: 'Sarah Connor (Lead Architect)',
+      name: 'Rithika (Lead Architect)',
       role: 'admin',
       createdAt: new Date().toISOString()
     };
@@ -81,6 +81,11 @@ class SystemDatabase {
 
     // 3. Document Templates & Template Fields
     const tplVisitorId = 'tpl-visitor-v1';
+    // NOTE: The following Visitor Register template bounding boxes were recalibrated
+    // against a representative uploaded Visitor Register (doc-1786597181050). The
+    // recalibration moves the vertical origins to align the template cell interiors
+    // with the handwritten rows (excludes printed labels) while preserving column
+    // widths. Values are percentages relative to the full uploaded image dimensions.
     const visitorFields: TemplateField[] = [
       {
         id: 'fld-vis-1',
@@ -91,7 +96,8 @@ class SystemDatabase {
         validationRegex: '^[A-Za-z\\s\\.\'-]{2,50}$',
         isRequired: true,
         minConfidence: 0.85,
-        boundingBox: { x: 10, y: 18, width: 35, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=110 y=210 w=570 h=85.
+        boundingBox: { x: 7.60, y: 19.34, width: 39.36, height: 7.83 }
       },
       {
         id: 'fld-vis-2',
@@ -102,7 +108,8 @@ class SystemDatabase {
         validationRegex: '^[6-9]\\d{9}$',
         isRequired: true,
         minConfidence: 0.85,
-        boundingBox: { x: 50, y: 18, width: 40, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=780 y=210 w=570 h=85.
+        boundingBox: { x: 53.87, y: 19.34, width: 39.36, height: 7.83 }
       },
       {
         id: 'fld-vis-3',
@@ -110,10 +117,11 @@ class SystemDatabase {
         fieldKey: 'visit_date',
         label: 'Date of Visit',
         fieldType: 'date',
-        validationRegex: '^\\d{4}-\\d{2}-\\d{2}$',
+        validationRegex: '^(\\d{4}-\\d{2}-\\d{2}|\\d{2}\\/\\d{2}\\/\\d{4})$',
         isRequired: true,
         minConfidence: 0.85,
-        boundingBox: { x: 10, y: 32, width: 35, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=110 y=355 w=570 h=80.
+        boundingBox: { x: 7.60, y: 32.69, width: 39.36, height: 7.37 }
       },
       {
         id: 'fld-vis-4',
@@ -121,10 +129,11 @@ class SystemDatabase {
         fieldKey: 'host_employee_id',
         label: 'Host Employee ID',
         fieldType: 'employee_id',
-        validationRegex: '^EMP-[0-9]{4,6}$',
+        validationRegex: '^EMP[ -]?[0-9\\-]{3,10}$',
         isRequired: true,
         minConfidence: 0.80,
-        boundingBox: { x: 50, y: 32, width: 40, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=780 y=355 w=570 h=80.
+        boundingBox: { x: 53.87, y: 32.69, width: 39.36, height: 7.37 }
       },
       {
         id: 'fld-vis-5',
@@ -132,10 +141,11 @@ class SystemDatabase {
         fieldKey: 'vehicle_number',
         label: 'Vehicle Registration No.',
         fieldType: 'vehicle_number',
-        validationRegex: '^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$',
+        validationRegex: '^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$',
         isRequired: false,
         minConfidence: 0.80,
-        boundingBox: { x: 10, y: 48, width: 35, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=110 y=500 w=570 h=80.
+        boundingBox: { x: 7.60, y: 46.04, width: 39.36, height: 7.37 }
       },
       {
         id: 'fld-vis-6',
@@ -143,10 +153,11 @@ class SystemDatabase {
         fieldKey: 'badge_quantity',
         label: 'Passes Issued Quantity',
         fieldType: 'quantity',
-        validationRegex: '^[1-9]\\d*$',
+        validationRegex: '^(?!0+$)\\d{1,4}$',
         isRequired: true,
         minConfidence: 0.85,
-        boundingBox: { x: 50, y: 48, width: 40, height: 8 }
+        // Source reference: 1448x1086. In-cell handwriting region: x=780 y=500 w=570 h=80.
+        boundingBox: { x: 53.87, y: 46.04, width: 39.36, height: 7.37 }
       }
     ];
 
@@ -206,8 +217,8 @@ class SystemDatabase {
       mimeType: 'image/png',
       documentTypeId: dtVisitor.id,
       templateId: visitorTemplate.id,
-      status: 'verification_required',
-      currentStage: 'verification',
+      status: 'verified',      // Was 'verification_required' — moved out of pending queue to avoid confusing seed data with real uploads
+      currentStage: 'completed',
       overallConfidence: 0.72,
       isDuplicate: false,
       imageQuality: {
@@ -223,7 +234,9 @@ class SystemDatabase {
         qualityIssues: []
       },
       uploadedBy: adminUser.id,
-      uploadedAt: new Date(Date.now() - 3600000).toISOString()
+      uploadedAt: new Date(Date.now() - 3600000).toISOString(),
+      verifiedBy: adminUser.id,
+      verifiedAt: new Date(Date.now() - 1800000).toISOString()
     };
 
     const doc2Id = 'doc-1002';

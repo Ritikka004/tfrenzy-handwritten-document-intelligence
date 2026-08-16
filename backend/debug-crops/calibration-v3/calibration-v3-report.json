@@ -1,0 +1,130 @@
+[
+  {
+    "field": "visit_date",
+    "fullImage": "backend\\debug-crops\\test_row2_full.png",
+    "fullImageWidth": 1438,
+    "fullImageHeight": 140,
+    "originalBboxPercent": null,
+    "matchedCalPath": "backend\\debug-crops\\cal_visit_date.png",
+    "matchedTop": 60,
+    "matchedLeft": 5,
+    "calWidth": 630,
+    "calHeight": 65,
+    "inkTopInCal": 0,
+    "inkBottomInCal": 64,
+    "inkTopInFull": 60,
+    "inkBottomInFull": 124,
+    "proposedCrop": {
+      "left": 5,
+      "top": 57,
+      "width": 630,
+      "height": 71
+    },
+    "proposedCropPercent": {
+      "x": 0.34770514603616137,
+      "y": 40.714285714285715,
+      "width": 43.81084840055633,
+      "height": 50.71428571428571
+    },
+    "proposedCropPath": "backend\\debug-crops\\calibration-v3\\visit_date_proposed.png",
+    "ocrText": "",
+    "rawConf": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "host_employee_id",
+    "fullImage": "backend\\debug-crops\\test_row2_full.png",
+    "fullImageWidth": 1438,
+    "fullImageHeight": 140,
+    "originalBboxPercent": null,
+    "matchedCalPath": "backend\\debug-crops\\cal_host_emp.png",
+    "matchedTop": 60,
+    "matchedLeft": 643,
+    "calWidth": 790,
+    "calHeight": 65,
+    "inkTopInCal": 0,
+    "inkBottomInCal": 64,
+    "inkTopInFull": 60,
+    "inkBottomInFull": 124,
+    "proposedCrop": {
+      "left": 643,
+      "top": 57,
+      "width": 790,
+      "height": 71
+    },
+    "proposedCropPercent": {
+      "x": 44.71488178025035,
+      "y": 40.714285714285715,
+      "width": 54.93741307371349,
+      "height": 50.71428571428571
+    },
+    "proposedCropPath": "backend\\debug-crops\\calibration-v3\\host_employee_id_proposed.png",
+    "ocrText": "LAA B",
+    "rawConf": 19,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "vehicle_number",
+    "fullImage": "backend\\debug-crops\\test_row3_full.png",
+    "fullImageWidth": 1438,
+    "fullImageHeight": 130,
+    "originalBboxPercent": null,
+    "matchedCalPath": "backend\\debug-crops\\cal_vehicle.png",
+    "matchedTop": 54,
+    "matchedLeft": 5,
+    "calWidth": 630,
+    "calHeight": 55,
+    "inkTopInCal": 0,
+    "inkBottomInCal": 54,
+    "inkTopInFull": 54,
+    "inkBottomInFull": 108,
+    "proposedCrop": {
+      "left": 5,
+      "top": 51,
+      "width": 630,
+      "height": 61
+    },
+    "proposedCropPercent": {
+      "x": 0.34770514603616137,
+      "y": 39.23076923076923,
+      "width": 43.81084840055633,
+      "height": 46.92307692307692
+    },
+    "proposedCropPath": "backend\\debug-crops\\calibration-v3\\vehicle_number_proposed.png",
+    "ocrText": "V RE N",
+    "rawConf": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "badge_quantity",
+    "fullImage": "backend\\debug-crops\\test_row3_full.png",
+    "fullImageWidth": 1438,
+    "fullImageHeight": 130,
+    "originalBboxPercent": null,
+    "matchedCalPath": "backend\\debug-crops\\cal_passes.png",
+    "matchedTop": 54,
+    "matchedLeft": 643,
+    "calWidth": 790,
+    "calHeight": 55,
+    "inkTopInCal": 0,
+    "inkBottomInCal": 54,
+    "inkTopInFull": 54,
+    "inkBottomInFull": 108,
+    "proposedCrop": {
+      "left": 643,
+      "top": 51,
+      "width": 790,
+      "height": 61
+    },
+    "proposedCropPercent": {
+      "x": 44.71488178025035,
+      "y": 39.23076923076923,
+      "width": 54.93741307371349,
+      "height": 46.92307692307692
+    },
+    "proposedCropPath": "backend\\debug-crops\\calibration-v3\\badge_quantity_proposed.png",
+    "ocrText": "",
+    "rawConf": 0,
+    "expected": "02"
+  }
+]

@@ -1,0 +1,261 @@
+[
+  {
+    "document": "test_row2_full.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "Date of Visit\n| 09/08/2026",
+    "normalized_output": "DATEOFVISIT09/08/2026",
+    "confidence": 80,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test_row2_full.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "| Host Employee ID :\nEMP 12234",
+    "normalized_output": "HOSTEMPLOYEEIDEMP12234",
+    "confidence": 70,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test_row3_full.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "| Vehicle Registration No.\nCA ET 8 75), ON, Gu",
+    "normalized_output": "VEHICLEREGISTRATIONNOCAET875ONGU",
+    "confidence": 56,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test_row3_full.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "Passes Issued Quantity\n~~)",
+    "normalized_output": "PASSESISSUEDQUANTITY",
+    "confidence": 78,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test2_date_hand.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "vo itll sllfNegl SC",
+    "normalized_output": "VOITLLSLLFNEGLSC",
+    "confidence": 29,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test2_date_hand.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": null,
+    "exact_match": null,
+    "visual_crop_quality": "skipped",
+    "skip_reason": "bbox_out_of_bounds"
+  },
+  {
+    "document": "test2_host_emp_hand.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "| = — a Ae —\n= NY HN) AY)",
+    "normalized_output": "AAENYHNAY",
+    "confidence": 36,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "test2_host_emp_hand.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": 0,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "final_visit_date.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "| fe ail] He GC",
+    "normalized_output": "FEAILHEGC",
+    "confidence": 41,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "final_visit_date.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": null,
+    "exact_match": null,
+    "visual_crop_quality": "skipped",
+    "skip_reason": "bbox_out_of_bounds"
+  },
+  {
+    "document": "final_host_emp_id.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "| CT NIC) HN) AY ©)",
+    "normalized_output": "CTNICHNAY",
+    "confidence": 43,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "final_host_emp_id.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": 0,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "cal_visit_date.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "| AG rn 159 rl",
+    "normalized_output": "AGRN159RL",
+    "confidence": 47,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "cal_visit_date.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": null,
+    "exact_match": null,
+    "visual_crop_quality": "skipped",
+    "skip_reason": "bbox_out_of_bounds"
+  },
+  {
+    "document": "cal_host_emp.png",
+    "field": "visit_date",
+    "bbox": {
+      "x": 25,
+      "y": 39,
+      "width": 539,
+      "height": 101
+    },
+    "expected_value": "09/08/2026",
+    "ocr_output": "[ TENA) HD). 2D fa",
+    "normalized_output": "TENAHD2DFA",
+    "confidence": 47,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  },
+  {
+    "document": "cal_host_emp.png",
+    "field": "host_employee_id",
+    "bbox": {
+      "x": 685,
+      "y": 32,
+      "width": 451,
+      "height": 108
+    },
+    "expected_value": "EMP1234",
+    "ocr_output": "",
+    "normalized_output": "",
+    "confidence": 0,
+    "exact_match": false,
+    "visual_crop_quality": "good"
+  }
+]

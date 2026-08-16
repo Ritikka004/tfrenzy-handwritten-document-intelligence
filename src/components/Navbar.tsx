@@ -82,10 +82,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, pending
             className="flex items-center space-x-2 pl-2 border-l border-slate-800 cursor-pointer hover:opacity-80 transition"
           >
             <div className="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-300 font-semibold text-xs">
-              {user ? user.fullName.split(' ').map(n => n[0]).join('') : 'SC'}
+              {user ? user.fullName.split(' ').map(n => n[0]).join('') : 'R'}
             </div>
             <div className="hidden xl:block text-left text-xs">
-              <p className="font-semibold text-slate-200">{user?.fullName || 'Sarah Connor'}</p>
+              <p className="font-semibold text-slate-200">{user?.fullName || 'Rithika'}</p>
               <div className="flex items-center gap-1">
                 <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded font-bold uppercase">
                   {user?.role || 'admin'}

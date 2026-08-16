@@ -1,0 +1,280 @@
+[
+  {
+    "field": "vehicle_number",
+    "selected_bbox": {
+      "x": 57,
+      "y": 36,
+      "width": 664,
+      "height": 94
+    },
+    "variants": [
+      {
+        "field": "vehicle_number",
+        "preprocessing": "original",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_original.png",
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "ocr_confidence": 47,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "grayscale",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_grayscale.png",
+        "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+        "ocr_confidence": 52,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "high_contrast",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_high_contrast.png",
+        "ocr_text": "Vehicle Registration No.\nT al mA Os 1A 2 J.",
+        "ocr_confidence": 69,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "threshold",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_threshold.png",
+        "ocr_text": "Vehicle Registration No.\nTT al mA ON ADS",
+        "ocr_confidence": 60,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "line_removal",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_line_removal.png",
+        "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+        "ocr_confidence": 52,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "label_mask",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_label_mask.png",
+        "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+        "ocr_confidence": 52,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "line_removal+threshold",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_line_removal+threshold.png",
+        "ocr_text": "Vehicle Registration No.\nTT al mA ON ADS",
+        "ocr_confidence": 60,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": true
+      },
+      {
+        "field": "vehicle_number",
+        "preprocessing": "label_mask+threshold",
+        "crop": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\vehicle_number\\vehicle_number_label_mask+threshold.png",
+        "ocr_text": "Vehicle Registration No.\nTT al mA ON ADS",
+        "ocr_confidence": 60,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      }
+    ]
+  },
+  {
+    "field": "badge_quantity",
+    "selected_bbox": {
+      "x": 699,
+      "y": 3,
+      "width": 674,
+      "height": 127
+    },
+    "variants": [
+      {
+        "field": "badge_quantity",
+        "preprocessing": "original",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_original.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 79,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "grayscale",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_grayscale.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 79,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "high_contrast",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_high_contrast.png",
+        "ocr_text": "Passes Issued Quantity\n~~ A",
+        "ocr_confidence": 72,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "threshold",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_threshold.png",
+        "ocr_text": "Passes Issued Quantity\nVaal",
+        "ocr_confidence": 74,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "line_removal",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_line_removal.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 79,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": true
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "label_mask",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_label_mask.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 79,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "line_removal+threshold",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_line_removal+threshold.png",
+        "ocr_text": "Passes Issued Quantity\nVaal",
+        "ocr_confidence": 73,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": true
+      },
+      {
+        "field": "badge_quantity",
+        "preprocessing": "label_mask+threshold",
+        "crop": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127
+        },
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v13\\badge_quantity\\badge_quantity_label_mask+threshold.png",
+        "ocr_text": "Passes Issued Quantity\nVaal",
+        "ocr_confidence": 74,
+        "recovered": false,
+        "labelPresent": true,
+        "handwritingDamaged": false
+      }
+    ]
+  }
+]

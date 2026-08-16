@@ -123,6 +123,13 @@ export interface Document {
   uploadedAt: string;
   verifiedBy?: string;
   verifiedAt?: string;
+  // -------- Visitor Details --------
+  visitorName?: string;
+  mobileNumber?: string;
+  visitDate?: string;
+  hostEmployeeId?: string;
+  vehicleRegistrationNumber?: string;
+ passIssueQuality?: string;
 }
 
 export interface DetectedRegion {

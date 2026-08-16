@@ -1,0 +1,54 @@
+[
+  {
+    "field": "visit_date",
+    "visual_quality": "fair",
+    "handwriting_visible": true,
+    "complete_value_visible": false,
+    "likely_crop_problem": true,
+    "likely_ocr_problem": false,
+    "best_preprocessing": "upscale2x",
+    "best_psm": 6,
+    "best_whitelist": false,
+    "best_ocr": "Date of Visit\n09/08/2026",
+    "best_confidence": 72
+  },
+  {
+    "field": "host_employee_id",
+    "visual_quality": "fair",
+    "handwriting_visible": true,
+    "complete_value_visible": false,
+    "likely_crop_problem": true,
+    "likely_ocr_problem": true,
+    "best_preprocessing": "high_contrast",
+    "best_psm": 6,
+    "best_whitelist": false,
+    "best_ocr": "| Host Employee ID\nEMP 2234",
+    "best_confidence": 82
+  },
+  {
+    "field": "vehicle_number",
+    "visual_quality": "fair",
+    "handwriting_visible": true,
+    "complete_value_visible": false,
+    "likely_crop_problem": true,
+    "likely_ocr_problem": true,
+    "best_preprocessing": "high_contrast",
+    "best_psm": 6,
+    "best_whitelist": false,
+    "best_ocr": "| Vehicle Registration No.\nTT Al mA Os AA)",
+    "best_confidence": 63
+  },
+  {
+    "field": "badge_quantity",
+    "visual_quality": "fair",
+    "handwriting_visible": true,
+    "complete_value_visible": false,
+    "likely_crop_problem": true,
+    "likely_ocr_problem": true,
+    "best_preprocessing": "grayscale",
+    "best_psm": 6,
+    "best_whitelist": false,
+    "best_ocr": "Passes Issued Quantity\n~~)",
+    "best_confidence": 79
+  }
+]

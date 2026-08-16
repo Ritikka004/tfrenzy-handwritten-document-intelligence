@@ -1,0 +1,14 @@
+{
+  "documentId": "doc-1786430318607",
+  "corrections": [
+    {
+      "fieldKey": "mobile_number",
+      "correctedText": "9876543210"
+    },
+    {
+      "fieldKey": "vehicle_number",
+      "correctedText": "KL07CD1234"
+    }
+  ],
+  "userId": "usr-002"
+}

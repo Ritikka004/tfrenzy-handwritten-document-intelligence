@@ -1,0 +1,64 @@
+{
+  "origMeta": {
+    "format": "png",
+    "mediaType": "image/png",
+    "size": 142737,
+    "width": 982,
+    "height": 174,
+    "space": "srgb",
+    "channels": 3,
+    "depth": "uchar",
+    "density": 72,
+    "isProgressive": false,
+    "isPalette": false,
+    "bitsPerSample": 8,
+    "hasProfile": false,
+    "hasAlpha": false,
+    "autoOrient": {
+      "width": 982,
+      "height": 174
+    }
+  },
+  "preMeta": {
+    "format": "png",
+    "mediaType": "image/png",
+    "size": 15155,
+    "width": 2946,
+    "height": 522,
+    "space": "srgb",
+    "channels": 3,
+    "depth": "uchar",
+    "density": 72,
+    "isProgressive": false,
+    "isPalette": false,
+    "bitsPerSample": 8,
+    "hasProfile": false,
+    "hasAlpha": false,
+    "autoOrient": {
+      "width": 2946,
+      "height": 522
+    }
+  },
+  "tests": [
+    {
+      "name": "ORIGINAL_SINGLE_LINE",
+      "text": "987654320",
+      "confidence": 19
+    },
+    {
+      "name": "PREPROC_SINGLE_LINE",
+      "text": "987654320",
+      "confidence": 0
+    },
+    {
+      "name": "PREPROC_SINGLE_WORD",
+      "text": "26543200",
+      "confidence": 0
+    },
+    {
+      "name": "PREPROC_SINGLE_BLOCK",
+      "text": "987654320",
+      "confidence": 0
+    }
+  ]
+}

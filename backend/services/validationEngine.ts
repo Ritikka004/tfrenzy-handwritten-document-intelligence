@@ -61,23 +61,23 @@ export class ValidationEngine {
         break;
 
       case 'employee_id':
-        // Configured ID pattern e.g. EMP-1234 or similar
-        const empRegex = customRegex ? new RegExp(customRegex) : /^EMP-?[0-9]{3,6}$/i;
+        // Configured ID pattern e.g. EMP-4092 or EMP-2026-0457
+        const empRegex = customRegex ? new RegExp(customRegex) : /^EMP[ -]?[0-9\-]{3,10}$/i;
         isValid = empRegex.test(trimmed);
-        if (!isValid) errorMessage = 'Employee ID does not match expected format (e.g. EMP-4092).';
+        if (!isValid) errorMessage = 'Needs manual confirmation: Employee ID format invalid (e.g. EMP-2026-0457).';
         break;
 
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         isValid = emailRegex.test(trimmed);
-        if (!isValid) errorMessage = 'Invalid email address structure.';
+        if (!isValid) errorMessage = 'Needs manual confirmation: Invalid email structure.';
         break;
 
       case 'vehicle_number':
-        // Registration number pattern e.g. KA01AB1234
+        // Registration number pattern e.g. KL07CD1234 or TN09BX1234
         const vehicleRegex = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$/i;
         isValid = vehicleRegex.test(trimmed.replace(/\s/g, ''));
-        if (!isValid) errorMessage = 'Vehicle registration pattern invalid (e.g. KA01AB1234).';
+        if (!isValid) errorMessage = 'Needs manual confirmation: Vehicle registration pattern invalid.';
         break;
 
       case 'quantity':

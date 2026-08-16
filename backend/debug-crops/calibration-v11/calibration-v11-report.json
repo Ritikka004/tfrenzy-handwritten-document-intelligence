@@ -1,0 +1,146 @@
+[
+  {
+    "field": "vehicle_number",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "template": {
+      "x": 72,
+      "y": 32,
+      "width": 634,
+      "height": 92
+    },
+    "inkBbox": {
+      "x": 60,
+      "y": 39,
+      "width": 658,
+      "height": 91,
+      "inkCount": 4564
+    },
+    "diagnostic": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\diagnostic\\vehicle_number_diagnostic.png",
+    "candidates": [
+      {
+        "x": 57,
+        "y": 36,
+        "width": 664,
+        "height": 94,
+        "margin": 3,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "ocr_confidence": 47,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      },
+      {
+        "x": 55,
+        "y": 34,
+        "width": 668,
+        "height": 96,
+        "margin": 5,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c1.png",
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "ocr_confidence": 47,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      },
+      {
+        "x": 52,
+        "y": 31,
+        "width": 674,
+        "height": 99,
+        "margin": 8,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c2.png",
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "ocr_confidence": 47,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      }
+    ],
+    "selected": {
+      "x": 57,
+      "y": 36,
+      "width": 664,
+      "height": 94,
+      "margin": 3,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+      "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+      "ocr_confidence": 47,
+      "inkFullyInside": true,
+      "printedLabelPresent": true,
+      "clipping": false
+    }
+  },
+  {
+    "field": "badge_quantity",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "template": {
+      "x": 719,
+      "y": 27,
+      "width": 634,
+      "height": 97
+    },
+    "inkBbox": {
+      "x": 707,
+      "y": 11,
+      "width": 658,
+      "height": 119,
+      "inkCount": 3813
+    },
+    "diagnostic": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\diagnostic\\badge_quantity_diagnostic.png",
+    "candidates": [
+      {
+        "x": 704,
+        "y": 8,
+        "width": 664,
+        "height": 122,
+        "margin": 3,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c0.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 78,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      },
+      {
+        "x": 702,
+        "y": 6,
+        "width": 668,
+        "height": 124,
+        "margin": 5,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c1.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 78,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      },
+      {
+        "x": 699,
+        "y": 3,
+        "width": 674,
+        "height": 127,
+        "margin": 8,
+        "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "ocr_confidence": 79,
+        "inkFullyInside": true,
+        "printedLabelPresent": true,
+        "clipping": false
+      }
+    ],
+    "selected": {
+      "x": 699,
+      "y": 3,
+      "width": 674,
+      "height": 127,
+      "margin": 8,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+      "ocr_text": "Passes Issued Quantity\n~~)",
+      "ocr_confidence": 79,
+      "inkFullyInside": true,
+      "printedLabelPresent": true,
+      "clipping": false
+    }
+  }
+]

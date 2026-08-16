@@ -1,0 +1,1538 @@
+[
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 77
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 77
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 77
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 77
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n090g 2026",
+    "confidence": 60
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n090g 2026",
+    "confidence": 60
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n090g 2026",
+    "confidence": 60
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n090g 2026",
+    "confidence": 60
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/08/2026",
+    "confidence": 4
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/08/2026",
+    "confidence": 72
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/08/2026",
+    "confidence": 4
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/08/2026",
+    "confidence": 72
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/08/2026",
+    "confidence": 4
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/08/2026",
+    "confidence": 72
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/08/2026",
+    "confidence": 4
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/08/2026",
+    "confidence": 72
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 78
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 78
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 78
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/]og]202¢",
+    "confidence": 78
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "09/0/2026",
+    "confidence": 0
+  },
+  {
+    "field": "visit_date",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Date of Visit\n09/og 2026",
+    "confidence": 57
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMR 9) 250",
+    "confidence": 68
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMR 9) 250",
+    "confidence": 68
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMR 9) 250",
+    "confidence": 68
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMR 9) 250",
+    "confidence": 68
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nER 9) 250",
+    "confidence": 69
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nER 9) 250",
+    "confidence": 69
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nER 9) 250",
+    "confidence": 69
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nE2920",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nER 9) 250",
+    "confidence": 69
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP23L4",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Host Employee ID\nEMP 234",
+    "confidence": 80
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP23L4",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Host Employee ID\nEMP 234",
+    "confidence": 80
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP23L4",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Host Employee ID\nEMP 234",
+    "confidence": 80
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP23L4",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Host Employee ID\nEMP 234",
+    "confidence": 80
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP2234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 2234",
+    "confidence": 82
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP2234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 2234",
+    "confidence": 82
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP2234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 2234",
+    "confidence": 82
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP2234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 2234",
+    "confidence": 82
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP1234",
+    "confidence": 11
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP1234",
+    "confidence": 11
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP1234",
+    "confidence": 11
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMP1234",
+    "confidence": 11
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMPI1234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMPI1234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMPI1234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "HEID\nEMPI1234",
+    "confidence": 0
+  },
+  {
+    "field": "host_employee_id",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Host Employee ID\nEMP 1234",
+    "confidence": 65
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nA LT IW 7 WR",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nA LT IW T=) WR. ud)",
+    "confidence": 51
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nA LT IW 7 WR",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nA LT IW T=) WR. ud)",
+    "confidence": 51
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nA LT IW 7 WR",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nA LT IW T=) WR. ud)",
+    "confidence": 51
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nA LT IW 7 WR",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nA LT IW T=) WR. ud)",
+    "confidence": 51
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nTR YN 2 TN IA",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTR ms YN 2 TN ky IA",
+    "confidence": 46
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nTR YN 2 TN IA",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTR ms YN 2 TN ky IA",
+    "confidence": 46
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nTR YN 2 TN IA",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTR ms YN 2 TN ky IA",
+    "confidence": 46
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nTR YN 2 TN IA",
+    "confidence": 6
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTR ms YN 2 TN ky IA",
+    "confidence": 46
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nCA ET 8 75 ON GL",
+    "confidence": 17
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nCA ET 8 75), ON, Gu",
+    "confidence": 55
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nCA ET 8 75 ON GL",
+    "confidence": 17
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nCA ET 8 75), ON, Gu",
+    "confidence": 55
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nCA ET 8 75 ON GL",
+    "confidence": 17
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nCA ET 8 75), ON, Gu",
+    "confidence": 55
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nCA ET 8 75 ON GL",
+    "confidence": 17
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nCA ET 8 75), ON, Gu",
+    "confidence": 55
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT AL NA ON AAS",
+    "confidence": 7
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT Al mA Os AA)",
+    "confidence": 63
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT AL NA ON AAS",
+    "confidence": 7
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT Al mA Os AA)",
+    "confidence": 63
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT AL NA ON AAS",
+    "confidence": 7
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT Al mA Os AA)",
+    "confidence": 63
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT AL NA ON AAS",
+    "confidence": 7
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT Al mA Os AA)",
+    "confidence": 63
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT A A ON 1A SL",
+    "confidence": 10
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT al mA ON dA S",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT A A ON 1A SL",
+    "confidence": 10
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT al mA ON dA S",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT A A ON 1A SL",
+    "confidence": 10
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT al mA ON dA S",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nTT A A ON 1A SL",
+    "confidence": 10
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nTT al mA ON dA S",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "V R N\nEP EE 2",
+    "confidence": 2
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nay EP EE 2",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "V R N\nEP EE 2",
+    "confidence": 2
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nay EP EE 2",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "V R N\nEP EE 2",
+    "confidence": 2
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nay EP EE 2",
+    "confidence": 56
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "V R N\nEP EE 2",
+    "confidence": 2
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "| Vehicle Registration No.\nay EP EE 2",
+    "confidence": 56
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 78
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 78
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 78
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 78
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A)",
+    "confidence": 66
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A)",
+    "confidence": 66
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A)",
+    "confidence": 66
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "upscale2x",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A)",
+    "confidence": 66
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A",
+    "confidence": 72
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A",
+    "confidence": 72
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A",
+    "confidence": 72
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "high_contrast",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n~~ A",
+    "confidence": 72
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 6,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 7,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 8,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": true,
+    "ocr_text": "",
+    "confidence": 0
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "inv_threshold",
+    "psm": 13,
+    "whitelist": false,
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71
+  }
+]

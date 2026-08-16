@@ -1,0 +1,50 @@
+[
+  {
+    "field": "vehicle_number",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "template": {
+      "x": 72,
+      "y": 32,
+      "width": 634,
+      "height": 92
+    },
+    "inkBbox": {
+      "x": 60,
+      "y": 39,
+      "width": 658,
+      "height": 91,
+      "inkCount": 4564
+    },
+    "labelRegion": {
+      "top": 38,
+      "bottom": 38
+    },
+    "separationRow": null,
+    "issue": "cannot reliably separate label and handwriting",
+    "visual_verdict": "OVERLAP_OR_UNKNOWN",
+    "ready": "NOT READY"
+  },
+  {
+    "field": "badge_quantity",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "template": {
+      "x": 719,
+      "y": 27,
+      "width": 634,
+      "height": 97
+    },
+    "inkBbox": {
+      "x": 707,
+      "y": 11,
+      "width": 658,
+      "height": 119,
+      "inkCount": 3813
+    },
+    "labelRegion": null,
+    "note": "label region not detected",
+    "separationRow": null,
+    "issue": "cannot reliably separate label and handwriting",
+    "visual_verdict": "OVERLAP_OR_UNKNOWN",
+    "ready": "NOT READY"
+  }
+]

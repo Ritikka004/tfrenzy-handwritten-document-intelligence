@@ -1,0 +1,156 @@
+[
+  {
+    "field": "vehicle_number",
+    "preprocessing": "original",
+    "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+    "confidence": 52,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_original.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "grayscale_adaptive_threshold",
+    "ocr_text": "Vehicle Registration No.\nTT al mA Os tn)",
+    "confidence": 64,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_grayscale_adaptive_threshold.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "horizontal_line_removal",
+    "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+    "confidence": 52,
+    "handwriting_preserved": true,
+    "printed_label_reduced": true,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_horizontal_line_removal.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "vertical_line_removal",
+    "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+    "confidence": 52,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_vertical_line_removal.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "connected_component_filtering",
+    "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+    "confidence": 52,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_connected_component_filtering.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "line_removal_plus_cc_filtering",
+    "ocr_text": "Vehicle Registration No.\nTEN VY DN 2. TNA 2 1",
+    "confidence": 52,
+    "handwriting_preserved": true,
+    "printed_label_reduced": true,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_line_removal_plus_cc_filtering.png"
+  },
+  {
+    "field": "vehicle_number",
+    "preprocessing": "cc_filtering_plus_light_threshold",
+    "ocr_text": "Vehicle Registration No.\nTT al mA Os tn)",
+    "confidence": 64,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/vehicle_number/vehicle_number_cc_filtering_plus_light_threshold.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "original",
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_original.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "grayscale_adaptive_threshold",
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_grayscale_adaptive_threshold.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "horizontal_line_removal",
+    "ocr_text": "| Passes Issued Quantity\n~~)",
+    "confidence": 82,
+    "handwriting_preserved": true,
+    "printed_label_reduced": true,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_horizontal_line_removal.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "vertical_line_removal",
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_vertical_line_removal.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "connected_component_filtering",
+    "ocr_text": "Passes Issued Quantity\n~~)",
+    "confidence": 79,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_connected_component_filtering.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "line_removal_plus_cc_filtering",
+    "ocr_text": "| Passes Issued Quantity\n~~)",
+    "confidence": 82,
+    "handwriting_preserved": true,
+    "printed_label_reduced": true,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_line_removal_plus_cc_filtering.png"
+  },
+  {
+    "field": "badge_quantity",
+    "preprocessing": "cc_filtering_plus_light_threshold",
+    "ocr_text": "Passes Issued Quantity\n—~A",
+    "confidence": 71,
+    "handwriting_preserved": true,
+    "printed_label_reduced": false,
+    "expected_value_recovered": false,
+    "pass": false,
+    "image_path": "C:/Users/Admin/Downloads/tfrenzy-handwritten-document-intelligence-platform/backend/debug-crops/calibration-v15/badge_quantity/badge_quantity_cc_filtering_plus_light_threshold.png"
+  }
+]

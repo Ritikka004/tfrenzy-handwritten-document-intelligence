@@ -7,20 +7,31 @@ import { Document, ExtractedField, HumanCorrection } from '../types/index.ts';
 
 interface VerificationViewProps {
   documents: Document[];
+  initialDocId?: string | null;
   onSaveCorrection: (documentId: string, corrections: Array<{ fieldKey: string; correctedText: string; notes?: string }>) => Promise<void>;
 }
 
 export const VerificationView: React.FC<VerificationViewProps> = ({
   documents,
+  initialDocId,
   onSaveCorrection
 }) => {
   const pendingDocs = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded');
-  const [selectedDocId, setSelectedDocId] = useState<string>(pendingDocs[0]?.id || documents[0]?.id || '');
+  const [selectedDocId, setSelectedDocId] = useState<string>(
+    initialDocId || pendingDocs[0]?.id || documents[0]?.id || ''
+  );
   const [fields, setFields] = useState<ExtractedField[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [activeFieldKey, setActiveFieldKey] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+  // When a new document is uploaded, auto-select it in the verification view
+  useEffect(() => {
+    if (initialDocId) {
+      setSelectedDocId(initialDocId);
+    }
+  }, [initialDocId]);
 
   useEffect(() => {
     if (selectedDocId) {
@@ -61,6 +72,12 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
 
     try {
       await onSaveCorrection(selectedDocId, correctionsList);
+      // Reflect corrections in-local UI immediately (backend preserves original OCR)
+      setFields(prev => prev.map(f => ({
+        ...f,
+        finalValue: editedValues[f.fieldKey] || f.ocrValue,
+        isCorrected: (editedValues[f.fieldKey] || f.ocrValue) !== f.ocrValue
+      })));
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
@@ -139,6 +156,7 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                   const isActive = activeFieldKey === fld.fieldKey;
                   const isLowConf = fld.confidenceLevel === 'low';
                   const isMedConf = fld.confidenceLevel === 'medium';
+                  const needsManual = (fld as any).needsManualCorrection || !fld.isValid;
 
                   return (
                     <div
@@ -147,6 +165,8 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                       className={`relative p-3 rounded-lg border cursor-pointer transition-all ${
                         isActive
                           ? 'border-blue-500 bg-blue-950/40 ring-2 ring-blue-500/50'
+                          : needsManual
+                          ? 'border-rose-500/70 bg-rose-950/20 hover:border-rose-400'
                           : isLowConf
                           ? 'border-rose-500/60 bg-rose-950/20 hover:border-rose-400'
                           : isMedConf
@@ -156,11 +176,17 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                     >
                       <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
                         <span className="font-bold text-slate-300">{fld.label}</span>
-                        <span className={`px-1.5 py-0.2 rounded font-mono font-bold text-[9px] ${
-                          isLowConf ? 'bg-rose-500/20 text-rose-400' : isMedConf ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
-                        }`}>
-                          {(fld.confidence * 100).toFixed(0)}%
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {needsManual && (
+                            <span className="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded font-semibold">Requires Manual Review</span>
+                          )}
+
+                          <span className={`px-1.5 py-0.2 rounded font-mono font-bold text-[9px] ${
+                            isLowConf ? 'bg-rose-500/20 text-rose-400' : isMedConf ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {(fld.confidence * 100).toFixed(0)}%
+                          </span>
+                        </div>
                       </div>
 
                       {/* Simulated Handwriting Representation */}
@@ -199,6 +225,7 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                 const isEdited = editedValues[fld.fieldKey] !== fld.ocrValue;
                 const isLow = fld.confidenceLevel === 'low';
                 const isMed = fld.confidenceLevel === 'medium';
+                const needsManual = (fld as any).needsManualCorrection || !fld.isValid;
 
                 return (
                   <div
@@ -207,13 +234,17 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                     className={`p-3.5 rounded-xl border transition-all ${
                       isActive
                         ? 'border-blue-500 bg-slate-950 shadow-md ring-1 ring-blue-500/40'
+                        : needsManual
+                        ? 'border-rose-500/60 bg-rose-950/10'
                         : 'border-slate-800 bg-slate-950/60 hover:bg-slate-950'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="text-xs font-bold text-slate-200 flex items-center gap-2">
                         <span>{fld.label}</span>
-                        {fld.isValid ? (
+                        {needsManual ? (
+                          <span className="text-[10px] text-rose-400 bg-rose-500/10 px-1.5 py-0.2 rounded font-semibold">Requires Manual Correction</span>
+                        ) : fld.isValid ? (
                           <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-semibold">Valid Type</span>
                         ) : (
                           <span className="text-[10px] text-rose-400 bg-rose-500/10 px-1.5 py-0.2 rounded font-semibold">Type Rule Failed</span>
@@ -238,6 +269,8 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                           className={`w-full bg-slate-900 border text-slate-100 rounded-lg px-3 py-1.5 text-xs font-mono font-semibold focus:outline-none ${
                             isEdited
                               ? 'border-amber-500 ring-1 ring-amber-500'
+                              : needsManual
+                              ? 'border-rose-500 ring-1 ring-rose-500/30'
                               : 'border-slate-700 focus:border-blue-500'
                           }`}
                         />

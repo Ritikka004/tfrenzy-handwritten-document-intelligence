@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-08-10T11:01:55.059Z",
+  "source_images_used": [
+    "backend/debug-crops/test_row2_full.png"
+  ],
+  "fields": [
+    {
+      "field": "visit_date",
+      "source_image": "backend/debug-crops/test_row2_full.png",
+      "source_dimensions": {
+        "width": 1438,
+        "height": 140
+      },
+      "database_bbox_percent": {
+        "x": 5,
+        "y": 34,
+        "width": 44,
+        "height": 7
+      },
+      "current_bbox_pixels": {
+        "x": 72,
+        "y": 48,
+        "width": 633,
+        "height": 10
+      },
+      "proposed_bbox_pixels": {
+        "x": 25,
+        "y": 39,
+        "width": 539,
+        "height": 101
+      },
+      "handwriting_region_pixels": {
+        "x": 77,
+        "y": 42,
+        "width": 435,
+        "height": 98
+      },
+      "handwriting_inside_current_bbox": false,
+      "handwriting_inside_proposed_bbox": true,
+      "crop_contains_printed_label": true,
+      "coordinate_mapping_correct": false,
+      "ocr_result_from_proposed_crop": "Date of Visit\n| 09/08/2026",
+      "root_cause": "the percentage bbox from database.ts does not scale correctly to the actual row-strip source image and the proposed validation crop still includes label text"
+    },
+    {
+      "field": "host_employee_id",
+      "source_image": "backend/debug-crops/test_row2_full.png",
+      "source_dimensions": {
+        "width": 1438,
+        "height": 140
+      },
+      "database_bbox_percent": {
+        "x": 50,
+        "y": 34,
+        "width": 44,
+        "height": 7
+      },
+      "current_bbox_pixels": {
+        "x": 719,
+        "y": 48,
+        "width": 633,
+        "height": 10
+      },
+      "proposed_bbox_pixels": {
+        "x": 685,
+        "y": 32,
+        "width": 451,
+        "height": 108
+      },
+      "handwriting_region_pixels": {
+        "x": 729,
+        "y": 35,
+        "width": 363,
+        "height": 105
+      },
+      "handwriting_inside_current_bbox": false,
+      "handwriting_inside_proposed_bbox": true,
+      "crop_contains_printed_label": true,
+      "coordinate_mapping_correct": false,
+      "ocr_result_from_proposed_crop": "| Host Employee ID :\nEMP 12234",
+      "root_cause": "the percentage bbox from database.ts does not scale correctly to the actual row-strip source image and the proposed validation crop still includes label text"
+    }
+  ],
+  "recommendation": "A) coordinate mapping is wrong and should be fixed"
+}

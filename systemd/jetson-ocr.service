@@ -1,0 +1,21 @@
+[Unit]
+Description=TFrenzy Intelligent Handwritten Document Intelligence Service (Jetson Edge)
+After=network.target docker.service postgresql.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=jetson
+WorkingDirectory=/opt/tfrenzy/tfrenzy-handwritten-document-intelligence-platform
+ExecStartPre=/usr/bin/docker-compose -f docker-compose.yml up -d redis postgresql
+ExecStart=/usr/bin/bun run server.ts
+Restart=always
+RestartSec=5
+KillMode=process
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=ENABLE_JETSON_TENSORRT=true
+Environment=TENSORRT_ENGINE_PATH=/opt/tfrenzy/models/tfrenzy_ocr_fp16.engine
+
+[Install]
+WantedBy=multi-user.target

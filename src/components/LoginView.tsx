@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.tsx';
 
 export const LoginView: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const { login } = useAuth();
-  const [email, setEmail] = useState('sarah.connor@tfrenzy.ai');
+  const [email, setEmail] = useState('rithika@tfrenzy.ai');
   const [password, setPassword] = useState('password123');
   const [selectedRole, setSelectedRole] = useState<'admin' | 'supervisor' | 'verifier' | 'auditor'>('admin');
   const [loading, setLoading] = useState(false);

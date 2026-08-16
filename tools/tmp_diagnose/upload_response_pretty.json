@@ -1,0 +1,132 @@
+{
+  "success": true,
+  "data": {
+    "document": {
+      "id": "doc-1786429399867",
+      "fileName": "1786252087700-9f4620e5-75e5-48f2-9b0c-91c48f435370.png",
+      "documentTypeId": "dt-visitor",
+      "status": "verification_required",
+      "uploadedAt": "2026-08-11T06:23:19.867Z",
+      "fileSize": 2175903,
+      "mimeType": "image/png"
+    },
+    "extractedFields": [
+      {
+        "id": "ef-1786429400095-visitor_name",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-1",
+        "fieldKey": "visitor_name",
+        "label": "Visitor Full Name",
+        "ocrValue": "Renuga K.",
+        "finalValue": "Renuga K.",
+        "confidence": 0.61,
+        "confidenceLevel": "low",
+        "isValid": true,
+        "isCorrected": false,
+        "regionBox": {
+          "x": 43,
+          "y": 23.54,
+          "width": 30,
+          "height": 8.2
+        }
+      },
+      {
+        "id": "ef-1786429400397-mobile_number",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-2",
+        "fieldKey": "mobile_number",
+        "label": "Mobile Phone Number",
+        "ocrValue": "987654320",
+        "finalValue": "987654320",
+        "confidence": 0.19,
+        "confidenceLevel": "low",
+        "isValid": false,
+        "validationMessage": "Phone number must contain 10 valid numerical digits.",
+        "isCorrected": false,
+        "regionBox": {
+          "x": 42,
+          "y": 32.91,
+          "width": 31,
+          "height": 7.03
+        }
+      },
+      {
+        "id": "ef-1786429400652-visit_date",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-3",
+        "fieldKey": "visit_date",
+        "label": "Date of Visit",
+        "ocrValue": "09/08/2026",
+        "finalValue": "09/08/2026",
+        "confidence": 0.53,
+        "confidenceLevel": "low",
+        "isValid": true,
+        "isCorrected": false,
+        "regionBox": {
+          "x": 43,
+          "y": 41.11,
+          "width": 30,
+          "height": 7.13
+        }
+      },
+      {
+        "id": "ef-1786429400944-host_employee_id",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-4",
+        "fieldKey": "host_employee_id",
+        "label": "Host Employee ID",
+        "ocrValue": "EMP-2026-0457",
+        "finalValue": "EMP-2026-0457",
+        "confidence": 0.89,
+        "confidenceLevel": "high",
+        "isValid": true,
+        "isCorrected": false,
+        "regionBox": {
+          "x": 43,
+          "y": 57.81,
+          "width": 30,
+          "height": 6.93
+        }
+      },
+      {
+        "id": "ef-1786429401242-vehicle_number",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-5",
+        "fieldKey": "vehicle_number",
+        "label": "Vehicle Registration No.",
+        "ocrValue": "RESORTSEDEEUS",
+        "finalValue": "RESORTSEDEEUS",
+        "confidence": 0.21,
+        "confidenceLevel": "low",
+        "isValid": false,
+        "validationMessage": "Needs manual confirmation: Vehicle registration pattern invalid.",
+        "isCorrected": false,
+        "regionBox": {
+          "x": 43,
+          "y": 49.41,
+          "width": 30,
+          "height": 7.23
+        }
+      },
+      {
+        "id": "ef-1786429401375-badge_quantity",
+        "documentId": "doc-1786429399867",
+        "templateFieldId": "fld-vis-6",
+        "fieldKey": "badge_quantity",
+        "label": "Passes Issued Quantity",
+        "ocrValue": "125",
+        "finalValue": "125",
+        "confidence": 0.41,
+        "confidenceLevel": "low",
+        "isValid": true,
+        "isCorrected": false,
+        "regionBox": {
+          "x": 43,
+          "y": 65.92,
+          "width": 30,
+          "height": 6.74
+        }
+      }
+    ]
+  }
+}

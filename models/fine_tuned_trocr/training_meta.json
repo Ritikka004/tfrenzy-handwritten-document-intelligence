@@ -1,0 +1,11 @@
+{
+  "model_name": "microsoft/trocr-base-stage1",
+  "fine_tuned_version": "v1.4-fine-tuned",
+  "epochs": 3,
+  "final_train_loss": 0.3432,
+  "final_cer": 3.2,
+  "final_wer": 5.76,
+  "training_samples": 5,
+  "export_format": "ONNX Opset 17",
+  "timestamp": "2026-08-16T12:13:12Z"
+}

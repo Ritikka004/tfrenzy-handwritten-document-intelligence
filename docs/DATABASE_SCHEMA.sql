@@ -57,6 +57,7 @@ CREATE TABLE template_fields (
 -- 5. DOCUMENTS
 CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    application_id TEXT UNIQUE,
     file_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
@@ -121,6 +122,7 @@ CREATE TABLE detected_regions (
 -- 9. OCR_PREDICTIONS
 CREATE TABLE ocr_predictions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
     region_id UUID NOT NULL REFERENCES detected_regions(id) ON DELETE CASCADE,
     field_key VARCHAR(100) NOT NULL,
     model_name VARCHAR(100) NOT NULL,
@@ -129,6 +131,7 @@ CREATE TABLE ocr_predictions (
     cleaned_text TEXT NOT NULL,
     confidence NUMERIC(3,2) NOT NULL,
     processing_time_ms INT NOT NULL,
+    cropped_image_path TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -146,6 +149,7 @@ CREATE TABLE extracted_fields (
     is_valid BOOLEAN NOT NULL DEFAULT TRUE,
     validation_message TEXT,
     is_corrected BOOLEAN NOT NULL DEFAULT FALSE
+    ,region_box JSONB
 );
 
 -- 11. FIELD_VALIDATIONS

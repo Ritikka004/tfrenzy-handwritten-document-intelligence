@@ -1,0 +1,186 @@
+[
+  {
+    "field": "vehicle_number",
+    "crop_bbox": {
+      "x": 57,
+      "y": 36,
+      "width": 664,
+      "height": 94,
+      "margin": 3,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+      "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+      "ocr_confidence": 47,
+      "inkFullyInside": true,
+      "printedLabelPresent": true,
+      "clipping": false
+    },
+    "variants": [
+      {
+        "preprocessing": "original",
+        "crop_bbox": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94,
+          "margin": 3,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+          "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+          "ocr_confidence": 47,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": null,
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "confidence": 47,
+        "label_removed": null,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      },
+      {
+        "preprocessing": "label_mask",
+        "crop_bbox": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94,
+          "margin": 3,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+          "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+          "ocr_confidence": 47,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": null,
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "confidence": 47,
+        "label_removed": null,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      },
+      {
+        "preprocessing": "label_mask+threshold",
+        "crop_bbox": {
+          "x": 57,
+          "y": 36,
+          "width": 664,
+          "height": 94,
+          "margin": 3,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\vehicle_number_v11_c0.png",
+          "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+          "ocr_confidence": 47,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": null,
+        "ocr_text": "Vehicle Registration No.\nA LT IW T=) WR. ud)",
+        "confidence": 47,
+        "label_removed": null,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      }
+    ]
+  },
+  {
+    "field": "badge_quantity",
+    "crop_bbox": {
+      "x": 699,
+      "y": 3,
+      "width": 674,
+      "height": 127,
+      "margin": 8,
+      "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+      "ocr_text": "Passes Issued Quantity\n~~)",
+      "ocr_confidence": 79,
+      "inkFullyInside": true,
+      "printedLabelPresent": true,
+      "clipping": false
+    },
+    "variants": [
+      {
+        "preprocessing": "original",
+        "crop_bbox": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127,
+          "margin": 8,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+          "ocr_text": "Passes Issued Quantity\n~~)",
+          "ocr_confidence": 79,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": null,
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "confidence": 79,
+        "label_removed": null,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      },
+      {
+        "preprocessing": "label_mask",
+        "crop_bbox": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127,
+          "margin": 8,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+          "ocr_text": "Passes Issued Quantity\n~~)",
+          "ocr_confidence": 79,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": {
+          "x": 26,
+          "y": 0,
+          "width": 359,
+          "height": 3
+        },
+        "ocr_text": "Passes Issued Quantity\n~~)",
+        "confidence": 79,
+        "label_removed": true,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      },
+      {
+        "preprocessing": "label_mask+threshold",
+        "crop_bbox": {
+          "x": 699,
+          "y": 3,
+          "width": 674,
+          "height": 127,
+          "margin": 8,
+          "path": "C:\\Users\\Admin\\Downloads\\tfrenzy-handwritten-document-intelligence-platform\\backend\\debug-crops\\calibration-v11\\crops\\badge_quantity_v11_c2.png",
+          "ocr_text": "Passes Issued Quantity\n~~)",
+          "ocr_confidence": 79,
+          "inkFullyInside": true,
+          "printedLabelPresent": true,
+          "clipping": false
+        },
+        "label_mask_bbox": {
+          "x": 26,
+          "y": 0,
+          "width": 359,
+          "height": 3
+        },
+        "ocr_text": "Passes Issued Quantity\nVaal",
+        "confidence": 74,
+        "label_removed": true,
+        "handwriting_preserved": true,
+        "expected_recovered": false,
+        "pass": false
+      }
+    ]
+  }
+]

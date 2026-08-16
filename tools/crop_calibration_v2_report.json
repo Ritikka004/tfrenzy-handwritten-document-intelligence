@@ -1,0 +1,270 @@
+[
+  {
+    "field": "visit_date",
+    "sourceImage": "backend\\debug-crops\\test_row2_full.png",
+    "originalBbox": {
+      "x": 5,
+      "y": 34,
+      "width": 44,
+      "height": 7
+    },
+    "tested": [
+      {
+        "offsetPercent": 2,
+        "newYPercent": 36,
+        "outPath": "backend\\debug-crops\\calibration-v2\\visit_date_yplus2.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 50,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 4,
+        "newYPercent": 38,
+        "outPath": "backend\\debug-crops\\calibration-v2\\visit_date_yplus4.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 53,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 6,
+        "newYPercent": 40,
+        "outPath": "backend\\debug-crops\\calibration-v2\\visit_date_yplus6.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 56,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 8,
+        "newYPercent": 42,
+        "outPath": "backend\\debug-crops\\calibration-v2\\visit_date_yplus8.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 59,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 10,
+        "newYPercent": 44,
+        "outPath": "backend\\debug-crops\\calibration-v2\\visit_date_yplus10.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 62,
+          "width": 633,
+          "height": 18
+        }
+      }
+    ]
+  },
+  {
+    "field": "host_employee_id",
+    "sourceImage": "backend\\debug-crops\\test_row2_full.png",
+    "originalBbox": {
+      "x": 50,
+      "y": 34,
+      "width": 44,
+      "height": 7
+    },
+    "tested": [
+      {
+        "offsetPercent": 2,
+        "newYPercent": 36,
+        "outPath": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus2.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 50,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 4,
+        "newYPercent": 38,
+        "outPath": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus4.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 53,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 6,
+        "newYPercent": 40,
+        "outPath": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus6.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 56,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 8,
+        "newYPercent": 42,
+        "outPath": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus8.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 59,
+          "width": 633,
+          "height": 18
+        }
+      },
+      {
+        "offsetPercent": 10,
+        "newYPercent": 44,
+        "outPath": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus10.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 62,
+          "width": 633,
+          "height": 18
+        }
+      }
+    ]
+  },
+  {
+    "field": "vehicle_number",
+    "sourceImage": "backend\\debug-crops\\test_row3_full.png",
+    "originalBbox": {
+      "x": 5,
+      "y": 47,
+      "width": 44,
+      "height": 7
+    },
+    "tested": [
+      {
+        "offsetPercent": 2,
+        "newYPercent": 49,
+        "outPath": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus2.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 64,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 4,
+        "newYPercent": 51,
+        "outPath": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus4.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 66,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 6,
+        "newYPercent": 53,
+        "outPath": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus6.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 69,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 8,
+        "newYPercent": 55,
+        "outPath": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus8.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 72,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 10,
+        "newYPercent": 57,
+        "outPath": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus10.png",
+        "cropPixels": {
+          "left": 72,
+          "top": 74,
+          "width": 633,
+          "height": 17
+        }
+      }
+    ]
+  },
+  {
+    "field": "badge_quantity",
+    "sourceImage": "backend\\debug-crops\\test_row3_full.png",
+    "originalBbox": {
+      "x": 50,
+      "y": 47,
+      "width": 44,
+      "height": 7
+    },
+    "tested": [
+      {
+        "offsetPercent": 2,
+        "newYPercent": 49,
+        "outPath": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus2.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 64,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 4,
+        "newYPercent": 51,
+        "outPath": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus4.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 66,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 6,
+        "newYPercent": 53,
+        "outPath": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus6.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 69,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 8,
+        "newYPercent": 55,
+        "outPath": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus8.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 72,
+          "width": 633,
+          "height": 17
+        }
+      },
+      {
+        "offsetPercent": 10,
+        "newYPercent": 57,
+        "outPath": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus10.png",
+        "cropPixels": {
+          "left": 719,
+          "top": 74,
+          "width": 633,
+          "height": 17
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,84 @@
+{
+  "model": "microsoft/trocr-base-handwritten",
+  "input": "backend\\debug-crops\\doc-1786616852275\\visit_date_ocr_input.png",
+  "input_sha256_before": "d4f306d4b5a1adad49c3ecd9d27b9ecd7f6c8d7c7df76c5681f54a1102e0ec63",
+  "input_sha256_after": "d4f306d4b5a1adad49c3ecd9d27b9ecd7f6c8d7c7df76c5681f54a1102e0ec63",
+  "input_unchanged": true,
+  "results": [
+    {
+      "name": "baseline_verified_input",
+      "inference": "greedy",
+      "raw_output": "0 0910812026",
+      "confidence": 0.8627724051475525,
+      "confidence_kind": "geometric_mean_selected_token_probability",
+      "processing_ms": 11293,
+      "input_dimensions": [
+        2340,
+        380
+      ]
+    },
+    {
+      "name": "autocontrast_in_memory",
+      "inference": "greedy",
+      "raw_output": "0 0910812026",
+      "confidence": 0.8627724051475525,
+      "confidence_kind": "geometric_mean_selected_token_probability",
+      "processing_ms": 5784,
+      "input_dimensions": [
+        2340,
+        380
+      ]
+    },
+    {
+      "name": "mild_contrast_1_25_in_memory",
+      "inference": "greedy",
+      "raw_output": "0 0910812026",
+      "confidence": 0.8519865274429321,
+      "confidence_kind": "geometric_mean_selected_token_probability",
+      "processing_ms": 5775,
+      "input_dimensions": [
+        2340,
+        380
+      ]
+    },
+    {
+      "name": "vertical_ink_band_in_memory",
+      "inference": "greedy",
+      "raw_output": "0 0910812026",
+      "confidence": 0.8444532155990601,
+      "confidence_kind": "geometric_mean_selected_token_probability",
+      "processing_ms": 6106,
+      "input_dimensions": [
+        2340,
+        293
+      ]
+    },
+    {
+      "name": "beam_2_verified_input",
+      "inference": "beam_search_2",
+      "raw_output": "0 0910812026",
+      "confidence": null,
+      "confidence_kind": "not_reported: beam score is length-normalized and not comparable to greedy confidence",
+      "sequence_score": -0.14760425686836243,
+      "processing_ms": 9724,
+      "input_dimensions": [
+        2340,
+        380
+      ]
+    },
+    {
+      "name": "beam_4_verified_input",
+      "inference": "beam_search_4",
+      "raw_output": "0 0910812026",
+      "confidence": null,
+      "confidence_kind": "not_reported: beam score is length-normalized and not comparable to greedy confidence",
+      "sequence_score": -0.1476043164730072,
+      "processing_ms": 16592,
+      "input_dimensions": [
+        2340,
+        380
+      ]
+    }
+  ],
+  "note": "Raw model outputs only. No validation, normalization, or expected-value comparison is used by this script."
+}

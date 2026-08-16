@@ -1,0 +1,98 @@
+[
+  {
+    "field": "visit_date",
+    "offset": 5,
+    "file": "backend\\debug-crops\\calibration-v2\\visit_date_yplus5.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "offset": 6,
+    "file": "backend\\debug-crops\\calibration-v2\\visit_date_yplus6.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "visit_date",
+    "offset": 7,
+    "file": "backend\\debug-crops\\calibration-v2\\visit_date_yplus7.png",
+    "ocrText": "8",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "host_employee_id",
+    "offset": 5,
+    "file": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus5.png",
+    "ocrText": "1FIVOLINIVCC1",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "offset": 6,
+    "file": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus6.png",
+    "ocrText": "1TIVOLLIIVCTTI1W",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "host_employee_id",
+    "offset": 7,
+    "file": "backend\\debug-crops\\calibration-v2\\host_employee_id_yplus7.png",
+    "ocrText": "RRRSACREELNRPEPNER",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "vehicle_number",
+    "offset": 7,
+    "file": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus7.png",
+    "ocrText": "EC MA",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "offset": 8,
+    "file": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus8.png",
+    "ocrText": "SR SR",
+    "rawConfidence": 9,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "vehicle_number",
+    "offset": 9,
+    "file": "backend\\debug-crops\\calibration-v2\\vehicle_number_yplus9.png",
+    "ocrText": "CE A S SB B-S- NE",
+    "rawConfidence": 8,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "badge_quantity",
+    "offset": 7,
+    "file": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus7.png",
+    "ocrText": "4",
+    "rawConfidence": 0,
+    "expected": "02"
+  },
+  {
+    "field": "badge_quantity",
+    "offset": 8,
+    "file": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus8.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "02"
+  },
+  {
+    "field": "badge_quantity",
+    "offset": 9,
+    "file": "backend\\debug-crops\\calibration-v2\\badge_quantity_yplus9.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "02"
+  }
+]

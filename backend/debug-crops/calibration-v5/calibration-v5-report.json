@@ -1,0 +1,314 @@
+[
+  {
+    "field": "visit_date",
+    "source": "backend/debug-crops/test_row2_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 140,
+    "inkBbox": {
+      "x": 77,
+      "y": 42,
+      "width": 435,
+      "height": 98,
+      "imgW": 1438,
+      "imgH": 140,
+      "inkCount": 3641
+    },
+    "diagnostic": "backend\\debug-crops\\calibration-v5\\diagnostic\\visit_date_diagnostic.png",
+    "candidates": [
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "visit_date",
+        "x": 77,
+        "y": 42,
+        "width": 435,
+        "height": 98,
+        "right": 511,
+        "bottom": 139,
+        "marginPercent": 0,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin0.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "visit_date",
+        "x": 66,
+        "y": 40,
+        "width": 457,
+        "height": 100,
+        "right": 522,
+        "bottom": 139,
+        "marginPercent": 5,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin5.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "visit_date",
+        "x": 55,
+        "y": 37,
+        "width": 479,
+        "height": 103,
+        "right": 533,
+        "bottom": 139,
+        "marginPercent": 10,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin10.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "visit_date",
+        "x": 45,
+        "y": 35,
+        "width": 500,
+        "height": 105,
+        "right": 544,
+        "bottom": 139,
+        "marginPercent": 15,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin15.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "visit_date",
+        "x": 34,
+        "y": 32,
+        "width": 522,
+        "height": 108,
+        "right": 555,
+        "bottom": 139,
+        "marginPercent": 20,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin20.png"
+      }
+    ]
+  },
+  {
+    "field": "host_employee_id",
+    "source": "backend/debug-crops/test_row2_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 140,
+    "inkBbox": {
+      "x": 729,
+      "y": 35,
+      "width": 363,
+      "height": 105,
+      "imgW": 1438,
+      "imgH": 140,
+      "inkCount": 3970
+    },
+    "diagnostic": "backend\\debug-crops\\calibration-v5\\diagnostic\\host_employee_id_diagnostic.png",
+    "candidates": [
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "host_employee_id",
+        "x": 729,
+        "y": 35,
+        "width": 363,
+        "height": 105,
+        "right": 1091,
+        "bottom": 139,
+        "marginPercent": 0,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin0.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "host_employee_id",
+        "x": 720,
+        "y": 33,
+        "width": 381,
+        "height": 107,
+        "right": 1100,
+        "bottom": 139,
+        "marginPercent": 5,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin5.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "host_employee_id",
+        "x": 711,
+        "y": 30,
+        "width": 399,
+        "height": 110,
+        "right": 1109,
+        "bottom": 139,
+        "marginPercent": 10,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin10.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "host_employee_id",
+        "x": 702,
+        "y": 27,
+        "width": 417,
+        "height": 113,
+        "right": 1118,
+        "bottom": 139,
+        "marginPercent": 15,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin15.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row2_full.png",
+        "field": "host_employee_id",
+        "x": 693,
+        "y": 25,
+        "width": 436,
+        "height": 115,
+        "right": 1128,
+        "bottom": 139,
+        "marginPercent": 20,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin20.png"
+      }
+    ]
+  },
+  {
+    "field": "vehicle_number",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 130,
+    "inkBbox": {
+      "x": 72,
+      "y": 38,
+      "width": 634,
+      "height": 92,
+      "imgW": 1438,
+      "imgH": 130,
+      "inkCount": 5867
+    },
+    "diagnostic": "backend\\debug-crops\\calibration-v5\\diagnostic\\vehicle_number_diagnostic.png",
+    "candidates": [
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "vehicle_number",
+        "x": 72,
+        "y": 38,
+        "width": 634,
+        "height": 92,
+        "right": 705,
+        "bottom": 129,
+        "marginPercent": 0,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin0.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "vehicle_number",
+        "x": 56,
+        "y": 36,
+        "width": 666,
+        "height": 94,
+        "right": 721,
+        "bottom": 129,
+        "marginPercent": 5,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin5.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "vehicle_number",
+        "x": 41,
+        "y": 34,
+        "width": 697,
+        "height": 96,
+        "right": 737,
+        "bottom": 129,
+        "marginPercent": 10,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin10.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "vehicle_number",
+        "x": 25,
+        "y": 31,
+        "width": 729,
+        "height": 99,
+        "right": 753,
+        "bottom": 129,
+        "marginPercent": 15,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin15.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "vehicle_number",
+        "x": 9,
+        "y": 29,
+        "width": 761,
+        "height": 101,
+        "right": 769,
+        "bottom": 129,
+        "marginPercent": 20,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin20.png"
+      }
+    ]
+  },
+  {
+    "field": "badge_quantity",
+    "source": "backend/debug-crops/test_row3_full.png",
+    "imageWidth": 1438,
+    "imageHeight": 130,
+    "inkBbox": {
+      "x": 719,
+      "y": 33,
+      "width": 634,
+      "height": 97,
+      "imgW": 1438,
+      "imgH": 130,
+      "inkCount": 5127
+    },
+    "diagnostic": "backend\\debug-crops\\calibration-v5\\diagnostic\\badge_quantity_diagnostic.png",
+    "candidates": [
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "badge_quantity",
+        "x": 719,
+        "y": 33,
+        "width": 634,
+        "height": 97,
+        "right": 1352,
+        "bottom": 129,
+        "marginPercent": 0,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin0.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "badge_quantity",
+        "x": 703,
+        "y": 31,
+        "width": 666,
+        "height": 99,
+        "right": 1368,
+        "bottom": 129,
+        "marginPercent": 5,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin5.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "badge_quantity",
+        "x": 688,
+        "y": 28,
+        "width": 697,
+        "height": 102,
+        "right": 1384,
+        "bottom": 129,
+        "marginPercent": 10,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin10.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "badge_quantity",
+        "x": 672,
+        "y": 26,
+        "width": 729,
+        "height": 104,
+        "right": 1400,
+        "bottom": 129,
+        "marginPercent": 15,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin15.png"
+      },
+      {
+        "source": "backend/debug-crops/test_row3_full.png",
+        "field": "badge_quantity",
+        "x": 656,
+        "y": 24,
+        "width": 761,
+        "height": 106,
+        "right": 1416,
+        "bottom": 129,
+        "marginPercent": 20,
+        "path": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin20.png"
+      }
+    ]
+  }
+]

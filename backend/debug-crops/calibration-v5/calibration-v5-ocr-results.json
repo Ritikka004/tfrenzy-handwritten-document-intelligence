@@ -1,0 +1,30 @@
+[
+  {
+    "field": "visit_date",
+    "file": "backend\\debug-crops\\calibration-v5\\candidates\\visit_date_candidate_margin0.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "09/08/2026"
+  },
+  {
+    "field": "host_employee_id",
+    "file": "backend\\debug-crops\\calibration-v5\\candidates\\host_employee_id_candidate_margin5.png",
+    "ocrText": "H E",
+    "rawConfidence": 0,
+    "expected": "EMP1234"
+  },
+  {
+    "field": "vehicle_number",
+    "file": "backend\\debug-crops\\calibration-v5\\candidates\\vehicle_number_candidate_margin10.png",
+    "ocrText": "",
+    "rawConfidence": 0,
+    "expected": "TN09BX1234"
+  },
+  {
+    "field": "badge_quantity",
+    "file": "backend\\debug-crops\\calibration-v5\\candidates\\badge_quantity_candidate_margin0.png",
+    "ocrText": "1",
+    "rawConfidence": 0,
+    "expected": "02"
+  }
+]
