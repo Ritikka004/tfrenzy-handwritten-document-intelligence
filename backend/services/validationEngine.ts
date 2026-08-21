@@ -4,8 +4,22 @@
  */
 
 import { FieldType, FieldValidationResult, ConfidenceLevel } from '../../src/types/index.ts';
+import { getConfidenceLevel } from '../constants/confidence.ts';
 
 export class ValidationEngine {
+  /** Normalize only unambiguous OCR dates. Ambiguous/malformed text stays untouched. */
+  public static normalizeDate(value: string): { value: string; error?: string } {
+    const trimmed = (value || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed) || /^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) return { value: trimmed };
+    if (!/^\d{8}$/.test(trimmed)) return { value: trimmed, error: 'Date must be YYYY-MM-DD or DD/MM/YYYY; OCR text was not safely normalized.' };
+    const day = Number(trimmed.slice(0, 2));
+    const month = Number(trimmed.slice(2, 4));
+    const year = Number(trimmed.slice(4));
+    if (day <= 12 && month <= 12) return { value: trimmed, error: 'Ambiguous eight-digit OCR date requires manual review.' };
+    if (month < 1 || month > 12 || day < 1 || day > new Date(year, month, 0).getDate()) return { value: trimmed, error: 'Invalid calendar date value.' };
+    return { value: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}` };
+  }
+
   public static validateField(
     fieldKey: string,
     fieldType: FieldType,
@@ -47,11 +61,19 @@ export class ValidationEngine {
 
       case 'date':
         // Valid date format ISO YYYY-MM-DD or DD/MM/YYYY
+        const normalized = this.normalizeDate(trimmed);
+        if (normalized.error) {
+          isValid = false;
+          errorMessage = normalized.error;
+          break;
+        }
         const dateRegex = /^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/;
-        isValid = dateRegex.test(trimmed);
+        isValid = dateRegex.test(normalized.value);
         if (isValid) {
-          const parsed = Date.parse(trimmed.replace(/\//g, '-'));
-          if (isNaN(parsed)) {
+          const [year, month, day] = normalized.value.includes('/')
+            ? [Number(normalized.value.slice(6)), Number(normalized.value.slice(3, 5)), Number(normalized.value.slice(0, 2))]
+            : [Number(normalized.value.slice(0, 4)), Number(normalized.value.slice(5, 7)), Number(normalized.value.slice(8, 10))];
+          if (month < 1 || month > 12 || day < 1 || day > new Date(year, month, 0).getDate()) {
             isValid = false;
             errorMessage = 'Invalid calendar date value.';
           }
@@ -89,9 +111,9 @@ export class ValidationEngine {
 
       case 'checklist':
         // Yes/No, Checked/Unchecked, true/false, 1/0
-        const normalized = trimmed.toLowerCase();
+        const normalizedChecklistValue = trimmed.toLowerCase();
         const validChecklistValues = ['yes', 'no', 'checked', 'unchecked', 'true', 'false', '1', '0', '[x]', '[ ]', 'v', 'x'];
-        isValid = validChecklistValues.includes(normalized);
+        isValid = validChecklistValues.includes(normalizedChecklistValue);
         if (!isValid) errorMessage = 'Checklist value must be Yes/No or Checked/Unchecked.';
         break;
 
@@ -107,12 +129,10 @@ export class ValidationEngine {
         isValid = true;
     }
 
-    // Determine confidence level:
-    let confidenceLevel: ConfidenceLevel = 'high';
-    if (!isValid || confidence < 0.65) {
+    // Determine confidence level using centralized classification
+    let confidenceLevel: ConfidenceLevel = getConfidenceLevel(confidence);
+    if (!isValid) {
       confidenceLevel = 'low';
-    } else if (confidence < 0.85) {
-      confidenceLevel = 'medium';
     }
 
     return {

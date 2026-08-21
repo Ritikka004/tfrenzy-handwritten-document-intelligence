@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Upload, CheckCircle2, RefreshCw, ArrowRight, AlertTriangle
+  Upload, CheckCircle2, RefreshCw, ArrowRight, AlertTriangle,
+  Camera, X, RotateCcw, ImagePlus
 } from 'lucide-react';
 import { DocumentType, Document } from '../types/index.ts';
 
@@ -21,12 +22,92 @@ export const UploadView: React.FC<UploadViewProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [visitorName, setVisitorName] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [visitDate, setVisitDate] = useState("");
-  const [hostEmployeeId, setHostEmployeeId] = useState("");
-  const [vehicleRegistrationNumber, setVehicleRegistrationNumber] = useState("");
-  const [passIssueQuality, setPassIssueQuality] = useState("");
+
+  // ── Camera state ──────────────────────────────────────────────────────────
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Stop camera stream helper
+  const stopStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  // Cleanup stream on unmount
+  useEffect(() => () => stopStream(), [stopStream]);
+
+  // Open camera
+  const openCamera = async () => {
+    setCapturedDataUrl(null);
+    setCameraError(null);
+    setShowCamera(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch {
+      setCameraError('Camera access denied or not available. Please allow camera permissions and try again.');
+      stopStream();
+    }
+  };
+
+  // Close camera modal
+  const closeCamera = () => {
+    stopStream();
+    setCapturedDataUrl(null);
+    setCameraError(null);
+    setShowCamera(false);
+  };
+
+  // Capture a photo frame
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    setCapturedDataUrl(dataUrl);
+    stopStream(); // stop live stream after capture
+  };
+
+  // Retake — re-open camera stream
+  const retakePhoto = async () => {
+    setCapturedDataUrl(null);
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch {
+      setCameraError('Camera access denied or not available.');
+      stopStream();
+    }
+  };
+
+  // Use captured photo — convert canvas to File, inject into existing upload flow
+  const useCapturedPhoto = () => {
+    if (!canvasRef.current) return;
+    canvasRef.current.toBlob((blob) => {
+      if (!blob) return;
+      const fileName = `camera_capture_${Date.now()}.jpg`;
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
+      setSelectedFile(file);
+      setErrorMessage(null);
+      closeCamera();
+    }, 'image/jpeg', 0.92);
+  };
 
   const handleUpload = async () => {
     if (!selectedFile) {
@@ -43,13 +124,6 @@ export const UploadView: React.FC<UploadViewProps> = ({
       formData.append("file", selectedFile);
       formData.append("documentTypeId", selectedTypeId);
 
-      if (visitorName) formData.append("visitorName", visitorName);
-      if (mobileNumber) formData.append("mobileNumber", mobileNumber);
-      if (visitDate) formData.append("visitDate", visitDate);
-      if (hostEmployeeId) formData.append("hostEmployeeId", hostEmployeeId);
-      if (vehicleRegistrationNumber) formData.append("vehicleRegistrationNumber", vehicleRegistrationNumber);
-      if (passIssueQuality) formData.append("passIssueQuality", passIssueQuality);
-
       const res = await fetch("/api/documents/upload", {
         method: "POST",
         body: formData,
@@ -60,12 +134,6 @@ export const UploadView: React.FC<UploadViewProps> = ({
         setUploadResult(json.data.document);
         onUploadSuccess(json.data.document);
         setSelectedFile(null);
-        setVisitorName("");
-        setMobileNumber("");
-        setVisitDate("");
-        setHostEmployeeId("");
-        setVehicleRegistrationNumber("");
-        setPassIssueQuality("");
       } else {
         setErrorMessage(json.error || "File upload failed.");
       }
@@ -107,59 +175,6 @@ export const UploadView: React.FC<UploadViewProps> = ({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Visitor Information */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Visitor Full Name"
-            value={visitorName}
-            onChange={(e) => setVisitorName(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          />
-
-          <input
-            type="text"
-            placeholder="Mobile Number"
-            value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          />
-
-          <input
-            type="date"
-            value={visitDate}
-            onChange={(e) => setVisitDate(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          />
-
-          <input
-            type="text"
-            placeholder="Host Employee ID"
-            value={hostEmployeeId}
-            onChange={(e) => setHostEmployeeId(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          />
-
-          <input
-            type="text"
-            placeholder="Vehicle Registration Number"
-            value={vehicleRegistrationNumber}
-            onChange={(e) => setVehicleRegistrationNumber(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          />
-
-          <select
-            value={passIssueQuality}
-            onChange={(e) => setPassIssueQuality(e.target.value)}
-            className="bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200"
-          >
-            <option value="">Pass Issue Quality</option>
-            <option value="Good">Good</option>
-            <option value="Average">Average</option>
-            <option value="Poor">Poor</option>
-          </select>
         </div>
 
         {/* Visible Error Banner */}
@@ -243,6 +258,16 @@ export const UploadView: React.FC<UploadViewProps> = ({
                 Choose File
               </label>
 
+              {/* Use Camera Button */}
+              <button
+                type="button"
+                onClick={openCamera}
+                className="inline-flex items-center gap-2 cursor-pointer px-5 py-3 bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 rounded-lg text-slate-200 font-semibold transition shadow-lg"
+              >
+                <Camera className="w-4 h-4 text-blue-400" />
+                Use Camera
+              </button>
+
               {/* Selected File */}
               {selectedFile && (
                 <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 max-w-md mx-auto">
@@ -320,6 +345,129 @@ export const UploadView: React.FC<UploadViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* ── Camera Modal ───────────────────────────────────────────────────── */}
+      {showCamera && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) closeCamera(); }}
+        >
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-bold text-slate-100">Camera Capture</span>
+              </div>
+              <button
+                onClick={closeCamera}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4">
+
+              {/* Camera permission error */}
+              {cameraError && (
+                <div className="flex items-start gap-2 p-3 bg-red-500/15 border border-red-500/30 rounded-lg text-xs text-red-300">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                  <span>{cameraError}</span>
+                </div>
+              )}
+
+              {/* Hidden canvas for frame capture */}
+              <canvas ref={canvasRef} className="hidden" />
+
+              {/* Live preview or captured image */}
+              {!capturedDataUrl ? (
+                <div className="relative bg-slate-950 rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-slate-800">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                  {!cameraError && (
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center">
+                      <span className="text-[10px] text-slate-400 bg-slate-950/70 px-2 py-0.5 rounded-full">
+                        Live preview
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="relative bg-slate-950 rounded-xl overflow-hidden aspect-video border border-slate-700">
+                  <img
+                    src={capturedDataUrl}
+                    alt="Captured photo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <span className="text-[10px] font-bold text-emerald-400 bg-slate-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      Preview
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                {!capturedDataUrl ? (
+                  // Before capture
+                  <>
+                    <button
+                      onClick={capturePhoto}
+                      disabled={!!cameraError}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm transition cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Capture Photo
+                    </button>
+                    <button
+                      onClick={closeCamera}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold text-sm transition cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  // After capture
+                  <>
+                    <button
+                      onClick={useCapturedPhoto}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-semibold text-sm transition cursor-pointer"
+                    >
+                      <ImagePlus className="w-4 h-4" />
+                      Use Photo
+                    </button>
+                    <button
+                      onClick={retakePhoto}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg font-semibold text-sm transition cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Retake
+                    </button>
+                    <button
+                      onClick={closeCamera}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-lg font-semibold text-sm transition cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

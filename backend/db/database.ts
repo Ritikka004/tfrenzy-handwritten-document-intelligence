@@ -38,7 +38,7 @@ class SystemDatabase {
     // 1. Users
     const adminUser: User = {
       id: 'usr-001',
-      email: 'admin@tfrenzy.ai',
+      email: 'rithika@tfrenzy.ai',
       name: 'Rithika (Lead Architect)',
       role: 'admin',
       createdAt: new Date().toISOString()
@@ -103,7 +103,7 @@ class SystemDatabase {
         id: 'fld-vis-2',
         templateId: tplVisitorId,
         fieldKey: 'mobile_number',
-        label: 'Mobile Phone Number',
+        label: 'Mobile Number',
         fieldType: 'phone',
         validationRegex: '^[6-9]\\d{9}$',
         isRequired: true,
@@ -139,7 +139,7 @@ class SystemDatabase {
         id: 'fld-vis-5',
         templateId: tplVisitorId,
         fieldKey: 'vehicle_number',
-        label: 'Vehicle Registration No.',
+        label: 'Vehicle Registration Number',
         fieldType: 'vehicle_number',
         validationRegex: '^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$',
         isRequired: false,
@@ -150,7 +150,7 @@ class SystemDatabase {
       {
         id: 'fld-vis-6',
         templateId: tplVisitorId,
-        fieldKey: 'badge_quantity',
+        fieldKey: 'passes_issued_quantity',
         label: 'Passes Issued Quantity',
         fieldType: 'quantity',
         validationRegex: '^(?!0+$)\\d{1,4}$',
@@ -217,8 +217,8 @@ class SystemDatabase {
       mimeType: 'image/png',
       documentTypeId: dtVisitor.id,
       templateId: visitorTemplate.id,
-      status: 'verified',      // Was 'verification_required' — moved out of pending queue to avoid confusing seed data with real uploads
-      currentStage: 'completed',
+      status: 'verification_required',
+      currentStage: 'verification',
       overallConfidence: 0.72,
       isDuplicate: false,
       imageQuality: {
@@ -234,9 +234,7 @@ class SystemDatabase {
         qualityIssues: []
       },
       uploadedBy: adminUser.id,
-      uploadedAt: new Date(Date.now() - 3600000).toISOString(),
-      verifiedBy: adminUser.id,
-      verifiedAt: new Date(Date.now() - 1800000).toISOString()
+      uploadedAt: new Date(Date.now() - 3600000).toISOString()
     };
 
     const doc2Id = 'doc-1002';
@@ -292,7 +290,7 @@ class SystemDatabase {
         documentId: doc1Id,
         templateFieldId: 'fld-vis-2',
         fieldKey: 'mobile_number',
-        label: 'Mobile Phone Number',
+        label: 'Mobile Number',
         ocrValue: '9876543210',
         finalValue: '9876543210',
         confidence: 0.96,
@@ -334,7 +332,7 @@ class SystemDatabase {
         documentId: doc1Id,
         templateFieldId: 'fld-vis-5',
         fieldKey: 'vehicle_number',
-        label: 'Vehicle Registration No.',
+        label: 'Vehicle Registration Number',
         ocrValue: 'KA01AB1234',
         finalValue: 'KA01AB1234',
         confidence: 0.78,
@@ -347,7 +345,7 @@ class SystemDatabase {
         id: 'ef-106',
         documentId: doc1Id,
         templateFieldId: 'fld-vis-6',
-        fieldKey: 'badge_quantity',
+        fieldKey: 'passes_issued_quantity',
         label: 'Passes Issued Quantity',
         ocrValue: '2',
         finalValue: '2',
@@ -398,42 +396,126 @@ class SystemDatabase {
     });
   }
 
-  public getDashboardMetrics(): DashboardMetrics {
-    const totalDocs = this.documents.length;
-    const pendingDocs = this.documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded').length;
-    const verifiedDocs = this.documents.filter(d => d.status === 'verified').length;
-    const rejectedDocs = this.documents.filter(d => d.status === 'rejected').length;
-    const stpRate = totalDocs > 0 ? Math.round((verifiedDocs / totalDocs) * 100) : 85;
+  public getDashboardMetrics(includeSeedData = true): DashboardMetrics {
+    const seedDocumentIds = new Set(['doc-1001', 'doc-1002']);
+    const activeDocuments = includeSeedData
+      ? this.documents
+      : this.documents.filter(d => !seedDocumentIds.has(d.id));
+    const activeDocumentIds = new Set(activeDocuments.map(d => d.id));
+    const activeJobs = this.processingJobs.filter(j => activeDocumentIds.has(j.documentId));
+    const activeFields = this.extractedFields.filter(f => activeDocumentIds.has(f.documentId));
+    const activeCanonicalFieldKeys = new Set([
+      'visitor_name', 'mobile_number', 'visit_date',
+      'host_employee_id', 'vehicle_number', 'passes_issued_quantity'
+    ]);
+    const activeCorrections = this.humanCorrections.filter(c =>
+      activeDocumentIds.has(c.documentId) && activeCanonicalFieldKeys.has(c.fieldKey)
+    );
+    const totalDocs = activeDocuments.length;
+    const awaitingDocs = activeDocuments.filter(d => d.status === 'verification_required' || d.status === 'uploaded');
+    const awaitingCount = awaitingDocs.length;
+    const processedDocs = activeDocuments.filter(d => d.status !== 'ocr_in_progress');
+    const processedCount = processedDocs.length;
+    const straightThroughCount = Math.max(0, processedCount - awaitingCount);
+    const stpRate = processedCount > 0 ? Number(((straightThroughCount / processedCount) * 100).toFixed(1)) : 0;
+
+    const validConfDocs = activeDocuments.filter(d => typeof d.overallConfidence === 'number' && d.overallConfidence > 0);
+    const avgConfidence = validConfDocs.length > 0
+      ? Number(((validConfDocs.reduce((acc, d) => acc + d.overallConfidence, 0) / validConfDocs.length) * 100).toFixed(1))
+      : 0;
+
+    const rejectedDocs = activeDocuments.filter(d => d.status === 'rejected' || (d.imageQuality && !d.imageQuality.isAcceptable)).length;
+
+    // Calculate dynamic processing time from completed processing jobs where timestamps exist
+    const completedJobs = activeJobs.filter(j => j.startedAt && j.completedAt);
+    let avgProcessingTimeSec = 0;
+    if (completedJobs.length > 0) {
+      const totalDurationMs = completedJobs.reduce((sum, j) => {
+        const start = new Date(j.startedAt!).getTime();
+        const end = new Date(j.completedAt!).getTime();
+        return sum + Math.max(0, end - start);
+      }, 0);
+      const avgMs = totalDurationMs / completedJobs.length;
+      if (avgMs > 0) {
+        avgProcessingTimeSec = Number((avgMs / 1000).toFixed(1));
+      }
+    }
+
+    // Calculate field accuracy dynamically from stored extracted fields
+    const canonicalFieldKeys = [
+      'visitor_name',
+      'mobile_number',
+      'visit_date',
+      'host_employee_id',
+      'vehicle_number',
+      'passes_issued_quantity'
+    ];
+    const fieldAccuracyMap: Record<string, number> = {};
+    for (const key of canonicalFieldKeys) {
+      const matchingFields = activeFields.filter(f => f.fieldKey === key && typeof f.confidence === 'number' && f.confidence > 0);
+      if (matchingFields.length > 0) {
+        const avg = matchingFields.reduce((sum, f) => sum + f.confidence, 0) / matchingFields.length;
+        fieldAccuracyMap[key] = Number((avg * 100).toFixed(1));
+      } else {
+        fieldAccuracyMap[key] = 0;
+      }
+    }
+
+    // Calculate accuracy by document type dynamically from stored documents
+    const accuracyByDocumentType: Record<string, number> = {};
+    for (const dt of this.documentTypes) {
+      const typeDocs = activeDocuments.filter(d => d.documentTypeId === dt.id && typeof d.overallConfidence === 'number' && d.overallConfidence > 0);
+      if (typeDocs.length > 0) {
+        const avg = typeDocs.reduce((sum, d) => sum + d.overallConfidence, 0) / typeDocs.length;
+        accuracyByDocumentType[dt.name] = Number((avg * 100).toFixed(1));
+      } else {
+        accuracyByDocumentType[dt.name] = 0;
+      }
+    }
+
+    // Derive most misread characters dynamically from stored human corrections
+    let mostMisreadCharacters: Array<{ char: string; misreadAs: string; count: number }> = [];
+    if (activeCorrections.length > 0) {
+      const misreadCounts: Record<string, { misreadAs: string; count: number }> = {};
+      for (const hc of activeCorrections) {
+        if (hc.originalOcrText && hc.correctedText && hc.originalOcrText !== hc.correctedText) {
+          const orig = hc.originalOcrText;
+          const corr = hc.correctedText;
+          const minLen = Math.min(orig.length, corr.length);
+          for (let i = 0; i < minLen; i++) {
+            if (orig[i] !== corr[i]) {
+              const pairKey = `${corr[i]}->${orig[i]}`;
+              if (!misreadCounts[pairKey]) {
+                misreadCounts[pairKey] = { misreadAs: orig[i], count: 0 };
+              }
+              misreadCounts[pairKey].count++;
+            }
+          }
+        }
+      }
+      const derived = Object.entries(misreadCounts).map(([key, info]) => ({
+        char: key.split('->')[0],
+        misreadAs: info.misreadAs,
+        count: info.count
+      })).sort((a, b) => b.count - a.count);
+
+      if (derived.length > 0) {
+        mostMisreadCharacters = derived.slice(0, 5);
+      }
+    }
 
     return {
-      documentsProcessed: totalDocs + 124,
-      documentsAwaitingVerification: pendingDocs,
-      straightThroughProcessingRate: stpRate,
-      avgProcessingTimeSec: 2.4,
-      avgConfidence: 89.6,
-      totalHumanCorrections: this.humanCorrections.length + 42,
-      fieldAccuracyMap: {
-        'visitor_name': 92.4,
-        'mobile_number': 98.1,
-        'visit_date': 96.5,
-        'host_employee_id': 94.2,
-        'vehicle_number': 89.0,
-        'badge_quantity': 99.2
-      },
-      accuracyByDocumentType: {
-        'Visitor Entry Register': 94.5,
-        'Employee Information Form': 91.2,
-        'Safety Inspection Form': 96.0,
-        'Maintenance Checklist': 88.5
-      },
-      mostMisreadCharacters: [
-        { char: 'u', misreadAs: 'v', count: 124 },
-        { char: '0', misreadAs: 'O', count: 98 },
-        { char: '1', misreadAs: 'I', count: 76 },
-        { char: '5', misreadAs: 'S', count: 42 }
-      ],
-      duplicateCount: 3,
-      rejectedImagesCount: rejectedDocs + 2
+      documentsProcessed: processedCount,
+      documentsAwaitingVerification: awaitingCount,
+      straightThroughProcessingRate: Math.min(100, Math.max(0, stpRate)),
+      avgProcessingTimeSec,
+      avgConfidence,
+      totalHumanCorrections: activeCorrections.length,
+      fieldAccuracyMap,
+      accuracyByDocumentType,
+      mostMisreadCharacters,
+      duplicateCount: activeDocuments.filter(d => d.isDuplicate).length,
+      rejectedImagesCount: rejectedDocs
     };
   }
 }

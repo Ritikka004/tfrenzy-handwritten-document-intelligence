@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
@@ -13,7 +14,8 @@ import { ValidationEngine } from './backend/services/validationEngine.ts';
 import { HybridOCRManager, PaddleOCRService, TrOCRService } from './backend/services/ocrEngine.ts';
 import { imagePreprocessor } from './backend/services/imagePreprocessor.ts';
 import { imageCropper } from './backend/services/imageCropper.ts';
-import { ExtractedField, Document, AuditLog, HumanCorrection, DetectedRegion, OCRPrediction, StructuredRecord } from './src/types/index.ts';
+import { ExtractedField, Document, DocumentStatus, ProcessingJob, ProcessingStage, AuditLog, HumanCorrection, DetectedRegion, OCRPrediction, StructuredRecord } from './src/types/index.ts';
+import { HIGH_CONFIDENCE_THRESHOLD, getConfidenceLevel, getFieldVerificationStatus } from './backend/constants/confidence.ts';
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -56,9 +58,125 @@ const upload = multer({
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+// The original upload, never a generated placeholder, is the preview source.
+app.use('/uploads', express.static(uploadDir));
+app.use((err: unknown, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({ success: false, error: 'Malformed JSON request body.' });
+    return;
+  }
+  next(err);
+});
 
 const ocrManager = new HybridOCRManager();
 const paddleEngine = new PaddleOCRService();
+const CANONICAL_FIELD_KEYS = new Set([
+  'visitor_name', 'mobile_number', 'visit_date',
+  'host_employee_id', 'vehicle_number', 'passes_issued_quantity'
+]);
+const SEED_DOCUMENT_IDS = new Set(['doc-1001', 'doc-1002']);
+const AUTH_SECRET = process.env.JWT_SECRET_KEY?.trim();
+if (!AUTH_SECRET) {
+  throw new Error('JWT_SECRET_KEY must be configured before starting the server.');
+}
+const VALID_LOGIN_ROLES = new Set(['admin', 'supervisor', 'verifier', 'auditor']);
+
+function encodeTokenPart(value: unknown): string {
+  return Buffer.from(JSON.stringify(value)).toString('base64url');
+}
+
+function signToken(header: Record<string, string>, payload: Record<string, unknown>): string {
+  const message = `${encodeTokenPart(header)}.${encodeTokenPart(payload)}`;
+  const signature = crypto.createHmac('sha256', AUTH_SECRET).update(message).digest('base64url');
+  return `${message}.${signature}`;
+}
+
+function verifyToken(token: string): Record<string, any> | null {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  try {
+    const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+    if (header?.alg !== 'HS256' || header?.typ !== 'JWT') return null;
+  } catch {
+    return null;
+  }
+  const message = `${parts[0]}.${parts[1]}`;
+  const expected = crypto.createHmac('sha256', AUTH_SECRET).update(message).digest();
+  const provided = Buffer.from(parts[2], 'base64url');
+  if (provided.length !== expected.length || !crypto.timingSafeEqual(provided, expected)) return null;
+  try {
+    return JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function isKnownUser(userId: unknown): userId is string {
+  return typeof userId === 'string' && db.users.some(user => user.id === userId);
+}
+
+const PASSWORD_MIN_LENGTH = 8;
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('base64url');
+  const hash = crypto.scryptSync(password, salt, 64).toString('base64url');
+  return `scrypt$${salt}$${hash}`;
+}
+function verifyPassword(password: string, encoded: string): boolean {
+  const [algorithm, salt, expected] = encoded.split('$');
+  if (algorithm !== 'scrypt' || !salt || !expected) return false;
+  const actual = crypto.scryptSync(password, salt, 64).toString('base64url');
+  const expectedBytes = Buffer.from(expected, 'base64url');
+  const actualBytes = Buffer.from(actual, 'base64url');
+  return expectedBytes.length === actualBytes.length && crypto.timingSafeEqual(expectedBytes, actualBytes);
+}
+
+type AuthenticatedRequest = express.Request & { auth?: { userId: string; role: string } };
+
+function authenticateApi(req: AuthenticatedRequest, res: express.Response, next: express.NextFunction): void {
+  // Public authentication and health endpoints do not require token authentication
+  const path = req.path || '';
+  const originalUrl = (req.originalUrl || req.url || '').split('?')[0];
+  if (
+    path === '/auth/login' || path === '/auth/register' ||
+    originalUrl === '/api/auth/login' || originalUrl === '/api/auth/register' ||
+    originalUrl.endsWith('/api/auth/login') || originalUrl.endsWith('/api/auth/register') ||
+    path === '/health' || originalUrl === '/api/health' || originalUrl.endsWith('/api/health')
+  ) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  const match = typeof authHeader === 'string' ? /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.exec(authHeader) : null;
+  if (!match) {
+    res.status(401).json({ success: false, error: 'Unauthorized' });
+    return;
+  }
+  const payload = verifyToken(match[1]);
+  const now = Math.floor(Date.now() / 1000);
+  const user = payload && isKnownUser(payload.sub) ? db.users.find(candidate => candidate.id === payload.sub) : undefined;
+  if (!payload || !user || payload.email !== user.email ||
+      typeof payload.iat !== 'number' || typeof payload.exp !== 'number' || payload.exp <= now ||
+      payload.role !== user.role) {
+    res.status(401).json({ success: false, error: 'Unauthorized' });
+    return;
+  }
+  req.auth = { userId: user.id, role: user.role };
+  next();
+}
+
+function requireRole(...roles: string[]) {
+  return (req: AuthenticatedRequest, res: express.Response, next: express.NextFunction): void => {
+    if (!req.auth || !roles.includes(req.auth.role)) {
+      res.status(403).json({ success: false, error: 'Forbidden' });
+      return;
+    }
+    next();
+  };
+}
+
+function getActiveDocuments(): Document[] {
+  return db.documents.filter(doc => !SEED_DOCUMENT_IDS.has(doc.id));
+}
 
 function documentTypeCode(documentTypeId: string): string {
   return db.documentTypes.find(t => t.id === documentTypeId)?.code || documentTypeId;
@@ -68,12 +186,97 @@ function actualModelVersion(documentId: string, fieldKey: string): string {
   return db.ocrPredictions.find(p => (p as any).documentId === documentId && p.fieldKey === fieldKey)?.modelVersion || 'unknown';
 }
 
-// Helper: annotate extracted fields for demo UI indicating manual correction need
-function annotateNeedsManualCorrection(fields: ExtractedField[]) {
-  return fields.map(f => ({
-    ...f,
-    needsManualCorrection: (!f.isValid || (typeof f.confidence === 'number' && f.confidence < 0.5))
-  }));
+/** Attach the template-derived, canonical verification decision to API fields. */
+function annotateVerificationStatus(fields: ExtractedField[]) {
+  return fields.map(f => {
+    const templateField = db.templateFields.find(candidate => candidate.id === f.templateFieldId);
+    const requiredConfidence = templateField?.minConfidence ?? HIGH_CONFIDENCE_THRESHOLD;
+    return {
+      ...f,
+      requiredConfidence,
+      verificationStatus: f.isCorrected
+        ? 'accepted'
+        : getFieldVerificationStatus(f.confidence, f.isValid, requiredConfidence)
+    };
+  });
+}
+
+function documentRequiresVerification(fields: ExtractedField[]): boolean {
+  return annotateVerificationStatus(fields).some(field => field.verificationStatus !== 'accepted');
+}
+
+// Helper: retrieve preferred field value (prefer finalValue if present/non-empty, else ocrValue)
+function getFieldFinalOrOcrValue(field: ExtractedField | undefined): string | undefined {
+  if (!field) return undefined;
+  if (typeof field.finalValue === 'string' && field.finalValue.trim() !== '') {
+    return field.finalValue;
+  }
+  if (typeof field.ocrValue === 'string' && field.ocrValue.trim() !== '') {
+    return field.ocrValue;
+  }
+  return undefined;
+}
+
+function getLatestHumanCorrection(documentId: string, fieldKey: string): HumanCorrection | undefined {
+  return db.humanCorrections
+    .filter(correction => correction.documentId === documentId && correction.fieldKey === fieldKey)
+    .sort((left, right) => new Date(right.correctedAt).getTime() - new Date(left.correctedAt).getTime())[0];
+}
+
+// Helper: dynamically attach extracted/verified field values to a document object
+function attachExtractedFieldsToDocument(doc: Document): Document {
+  const docFields = db.extractedFields.filter(f => f.documentId === doc.id && CANONICAL_FIELD_KEYS.has(f.fieldKey));
+  if (docFields.length === 0) {
+    const vNum = doc.vehicle_number || doc.vehicleNumber || doc.vehicleRegistrationNumber;
+    const pQty = doc.passes_issued_quantity || doc.passesIssuedQuantity || doc.passIssueQuality;
+    return {
+      ...doc,
+      visitor_name: doc.visitor_name || doc.visitorName,
+      visitorName: doc.visitor_name || doc.visitorName,
+      mobile_number: doc.mobile_number || doc.mobileNumber,
+      mobileNumber: doc.mobile_number || doc.mobileNumber,
+      visit_date: doc.visit_date || doc.visitDate,
+      visitDate: doc.visit_date || doc.visitDate,
+      host_employee_id: doc.host_employee_id || doc.hostEmployeeId,
+      hostEmployeeId: doc.host_employee_id || doc.hostEmployeeId,
+      vehicle_number: vNum,
+      vehicleNumber: vNum,
+      vehicleRegistrationNumber: vNum,
+      passes_issued_quantity: pQty,
+      passesIssuedQuantity: pQty,
+      passIssueQuality: pQty
+    };
+  }
+
+  const findVal = (keys: string[]): string | undefined => {
+    const field = docFields.find(f => keys.includes(f.fieldKey));
+    return getFieldFinalOrOcrValue(field);
+  };
+
+  const visitorName = findVal(['visitor_name', 'visitorName', 'visitor_full_name', 'name', 'full_name']) ?? (doc.visitor_name || doc.visitorName);
+  const mobileNumber = findVal(['mobile_number', 'mobileNumber', 'phone_number', 'phone', 'mobile', 'mobile_phone']) ?? (doc.mobile_number || doc.mobileNumber);
+  const visitDate = findVal(['visit_date', 'visitDate', 'date_of_visit', 'date']) ?? (doc.visit_date || doc.visitDate);
+  const hostEmployeeId = findVal(['host_employee_id', 'hostEmployeeId', 'employee_id', 'host_id']) ?? (doc.host_employee_id || doc.hostEmployeeId);
+  const vehicleNumber = findVal(['vehicle_number', 'vehicle_registration', 'vehicle_registration_number', 'vehicleRegistrationNumber', 'vehicleNumber', 'vehicle_no']) ?? (doc.vehicle_number || doc.vehicleNumber || doc.vehicleRegistrationNumber);
+  const passesIssuedQuantity = findVal(['passes_issued_quantity', 'passes_issued', 'passesIssuedQuantity', 'pass_quantity', 'pass_issue_quality', 'passIssueQuality', 'quantity']) ?? (doc.passes_issued_quantity || doc.passesIssuedQuantity || doc.passIssueQuality);
+
+  return {
+    ...doc,
+    visitor_name: visitorName,
+    visitorName,
+    mobile_number: mobileNumber,
+    mobileNumber,
+    visit_date: visitDate,
+    visitDate,
+    host_employee_id: hostEmployeeId,
+    hostEmployeeId,
+    vehicle_number: vehicleNumber,
+    vehicleNumber,
+    vehicleRegistrationNumber: vehicleNumber,
+    passes_issued_quantity: passesIssuedQuantity,
+    passesIssuedQuantity,
+    passIssueQuality: passesIssuedQuantity
+  };
 }
 
 // ==============================================================================
@@ -81,27 +284,71 @@ function annotateNeedsManualCorrection(fields: ExtractedField[]) {
 // ==============================================================================
 
 // 0. Auth & JWT Gateway API
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
-    // Generate mock JWT Token for authentication simulation
-    const mockPayload = {
-      sub: 'usr-001',
-      email: email || 'rithika@tfrenzy.ai',
-      role: role || 'admin',
+    const normalizedEmail = (typeof email === 'string' ? email.trim().toLowerCase() : '');
+    const providedPassword = (typeof password === 'string' ? password : '');
+
+    // Preserve the configured administrator account while authenticating registered
+    // users exclusively against their PostgreSQL password hashes.
+    const validEmail = process.env.DEMO_ADMIN_EMAIL?.trim().toLowerCase();
+    const validPassword = process.env.DEMO_ADMIN_PASSWORD;
+    const persistedUser = postgresDb.isConnected ? await postgresDb.findUserByEmail(normalizedEmail) : null;
+    const inMemUser = db.users.find(user => user.email.toLowerCase() === normalizedEmail);
+    const authenticatedUser = persistedUser?.isActive && verifyPassword(providedPassword, persistedUser.passwordHash)
+      ? persistedUser
+      : ((inMemUser as any)?.passwordHash && verifyPassword(providedPassword, (inMemUser as any).passwordHash)
+        ? inMemUser
+        : (validEmail && validPassword && normalizedEmail === validEmail && providedPassword === validPassword
+          ? db.users.find(user => user.id === 'usr-001')
+          : undefined));
+
+    if (!normalizedEmail || !providedPassword || !authenticatedUser) {
+      db.auditLogs.unshift({
+        id: `audit-${Date.now()}`,
+        userId: 'anonymous',
+        action: 'USER_LOGIN_FAILED',
+        resource: `User ${normalizedEmail || 'unknown'}`,
+        details: `Rejected login attempt for email "${normalizedEmail || ''}". Invalid credentials.`,
+        timestamp: new Date().toISOString()
+      });
+
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid email or password. Please check your credentials and try again.'
+      });
+    }
+
+    // Generate JWT Token for valid user
+    // The role belongs to the authenticated account, never to the request body.
+    const loginUser = authenticatedUser;
+    if (!loginUser || !VALID_LOGIN_ROLES.has(loginUser.role)) {
+      throw new Error('Configured login account is unavailable.');
+    }
+    // Rehydrate a persisted registration after a server restart so JWT middleware
+    // and role checks use the same authoritative identity.
+    if (!db.users.some(user => user.id === loginUser.id)) {
+      db.users.push({ id: loginUser.id, email: loginUser.email, name: loginUser.name, role: loginUser.role as any, createdAt: new Date().toISOString() });
+    }
+    const loginRole = loginUser.role;
+    const payload = {
+      sub: loginUser.id,
+      email: loginUser.email,
+      role: loginRole,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 86400
     };
 
-    const token = Buffer.from(JSON.stringify(mockPayload)).toString('base64');
+    const token = signToken({ alg: 'HS256', typ: 'JWT' }, payload);
 
     db.auditLogs.unshift({
       id: `audit-${Date.now()}`,
-      userId: 'usr-001',
+      userId: loginUser.id,
       action: 'USER_LOGIN',
-      resource: `User ${email}`,
-      details: `JWT access token issued for user with role ${role || 'admin'}.`,
+      resource: `User ${loginUser.email}`,
+      details: `JWT access token issued for authenticated user with role ${loginRole}.`,
       timestamp: new Date().toISOString()
     });
 
@@ -110,10 +357,10 @@ app.post('/api/auth/login', (req, res) => {
       access_token: token,
       token_type: 'bearer',
       user: {
-        id: 'usr-001',
-        email: email || 'rithika@tfrenzy.ai',
-        full_name: 'Rithika',
-        role: role || 'admin',
+        id: loginUser.id,
+        email: loginUser.email,
+        full_name: loginUser.name,
+        role: loginRole,
         is_active: true
       }
     });
@@ -122,23 +369,101 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
+app.post('/api/auth/register', async (req, res) => {
+  const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const password = typeof req.body?.password === 'string' ? req.body.password : '';
+  if (!name || !email || !password) return res.status(400).json({ success: false, error: 'Full name, email, and password are required.' });
+  if (name.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ success: false, error: 'Please provide a valid email address.' });
+  if (password.length < PASSWORD_MIN_LENGTH) return res.status(400).json({ success: false, error: `Password must be at least ${PASSWORD_MIN_LENGTH} characters.` });
+
+  if (!postgresDb.isConnected) {
+    return res.status(503).json({ success: false, error: 'Database connection is unavailable. Please try again later.' });
+  }
+
+  try {
+    if (await postgresDb.findUserByEmail(email)) {
+      return res.status(409).json({ success: false, error: 'An account with this email already exists.' });
+    }
+    const user = { id: uuidv4(), email, name, role: 'verifier' as const, createdAt: new Date().toISOString() };
+    await postgresDb.createUser(user, hashPassword(password));
+    db.users.push(user);
+    db.auditLogs.unshift({
+      id: `audit-${Date.now()}`,
+      userId: user.id,
+      action: 'USER_REGISTERED',
+      resource: `User ${user.id}`,
+      details: 'A verifier account was created.',
+      timestamp: new Date().toISOString()
+    });
+    return res.status(201).json({
+      success: true,
+      message: 'Account created successfully. Please sign in.',
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.name,
+        role: user.role,
+        is_active: true
+      }
+    });
+  } catch (error: any) {
+    if (error?.code === '23505') return res.status(409).json({ success: false, error: 'An account with this email already exists.' });
+    console.error('[AUTH] Registration failed:', error instanceof Error ? error.message : error);
+    return res.status(500).json({ success: false, error: 'Unable to create account. Please try again later.' });
+  }
+});
+
 app.get('/api/auth/me', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Missing or invalid authorization token' });
+    }
+
+    const rawToken = /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.exec(authHeader)?.[1];
+    if (!rawToken) return res.status(401).json({ success: false, error: 'Unauthorized: Invalid authorization token' });
+
+    const payload = verifyToken(rawToken);
+    const user = payload && isKnownUser(payload.sub) ? db.users.find(candidate => candidate.id === payload.sub) : undefined;
+    if (!payload || !user || payload.email !== user.email || payload.role !== user.role ||
+        typeof payload.iat !== 'number' || typeof payload.exp !== 'number' || payload.exp <= Math.floor(Date.now() / 1000)) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Invalid or expired token' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        email: user.email,
+        full_name: user.name,
+        role: user.role,
+        is_active: true
+      }
+    });
+  } catch {
+    res.status(401).json({ success: false, error: 'Unauthorized: Malformed token' });
+  }
+});
+
+app.get('/api/health', (_req, res) => {
   res.json({
     success: true,
-    data: {
-      id: 'usr-001',
-      email: 'rithika@tfrenzy.ai',
-      full_name: 'Rithika',
-      role: 'admin',
-      is_active: true
-    }
+    status: 'ok',
+    dataSource: postgresDb.isConnected ? 'PostgreSQL' : 'SystemDatabase'
   });
 });
+
+// All operational endpoints require an authenticated, signed session.
+app.use('/api', authenticateApi);
 
 // OpenCV Image Preprocessing APIs (Phase 3)
 app.post('/api/preprocessing/assess', upload.single('image'), async (req, res) => {
   try {
-    const buffer = req.file ? req.file.buffer : Buffer.from(req.body.imageBase64 || '', 'base64');
+    const buffer = req.file ? req.file.buffer : (req.body.imageBase64 ? Buffer.from(req.body.imageBase64, 'base64') : null);
+    if (!buffer || buffer.length === 0) {
+      return res.status(400).json({ success: false, error: 'image file or imageBase64 is required' });
+    }
     const width = parseInt(req.body.width || '1240', 10);
     const height = parseInt(req.body.height || '1754', 10);
     const estimatedDpi = parseInt(req.body.dpi || '300', 10);
@@ -152,7 +477,10 @@ app.post('/api/preprocessing/assess', upload.single('image'), async (req, res) =
 
 app.post('/api/preprocessing/process', upload.single('image'), async (req, res) => {
   try {
-    const buffer = req.file ? req.file.buffer : Buffer.from(req.body.imageBase64 || '', 'base64');
+    const buffer = req.file ? req.file.buffer : (req.body.imageBase64 ? Buffer.from(req.body.imageBase64, 'base64') : null);
+    if (!buffer || buffer.length === 0) {
+      return res.status(400).json({ success: false, error: 'image file or imageBase64 is required' });
+    }
     const enableDeskew = req.body.enableDeskew === 'true' || req.body.enableDeskew === true;
     const enablePerspective = req.body.enablePerspective === 'true' || req.body.enablePerspective === true;
     const enableClahe = req.body.enableClahe === 'true' || req.body.enableClahe === true;
@@ -174,7 +502,7 @@ app.post('/api/preprocessing/process', upload.single('image'), async (req, res) 
 // 1. Dashboard Metrics
 app.get('/api/dashboard/metrics', (req, res) => {
   try {
-    const metrics = db.getDashboardMetrics();
+    const metrics = db.getDashboardMetrics(false);
     res.json({ success: true, data: metrics });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
@@ -184,7 +512,7 @@ app.get('/api/dashboard/metrics', (req, res) => {
 // 2. Documents Management
 app.get('/api/documents', (req, res) => {
   const { status, typeId, search } = req.query;
-  let result = [...db.documents];
+  let result = getActiveDocuments().map(attachExtractedFieldsToDocument);
 
   if (status) {
     result = result.filter(d => d.status === status);
@@ -194,7 +522,16 @@ app.get('/api/documents', (req, res) => {
   }
   if (search) {
     const term = (search as string).toLowerCase();
-    result = result.filter(d => d.fileName.toLowerCase().includes(term));
+    result = result.filter(d =>
+      d.fileName.toLowerCase().includes(term) ||
+      d.id.toLowerCase().includes(term) ||
+      (d.visitorName || '').toLowerCase().includes(term) ||
+      (d.mobileNumber || '').includes(term) ||
+      (d.visitDate || '').toLowerCase().includes(term) ||
+      (d.hostEmployeeId || '').toLowerCase().includes(term) ||
+      (d.vehicleNumber || d.vehicleRegistrationNumber || '').toLowerCase().includes(term) ||
+      (d.passesIssuedQuantity || d.passIssueQuality || '').toLowerCase().includes(term)
+    );
   }
 
   res.json({ success: true, count: result.length, data: result });
@@ -234,12 +571,13 @@ app.get('/api/diagnostics/documents/:id', async (req, res) => {
 });
 
 app.get('/api/documents/:id', (req, res) => {
-  const doc = db.documents.find(d => d.id === req.params.id);
-  if (!doc) {
+  const rawDoc = db.documents.find(d => d.id === req.params.id);
+  if (!rawDoc) {
     return res.status(404).json({ success: false, error: 'Document not found' });
   }
 
-  const fields = db.extractedFields.filter(f => f.documentId === doc.id);
+  const doc = attachExtractedFieldsToDocument(rawDoc);
+  const fields = db.extractedFields.filter(f => f.documentId === doc.id && CANONICAL_FIELD_KEYS.has(f.fieldKey));
   const corrections = db.humanCorrections.filter(c => c.documentId === doc.id);
   const template = db.documentTemplates.find(t => t.id === doc.templateId);
 
@@ -253,13 +591,61 @@ app.get('/api/documents/:id', (req, res) => {
   res.json({
     success: true,
     data: {
-      document: doc,
+      document: { ...doc, imageUrl: (doc as any).storedFileName ? `/uploads/${encodeURIComponent((doc as any).storedFileName)}` : undefined },
       template,
-      extractedFields: annotateNeedsManualCorrection(fields),
-      humanCorrections: corrections
+      extractedFields: annotateVerificationStatus(fields),
+        humanCorrections: corrections,
+        processingJob: db.processingJobs.find(j => j.documentId === doc.id) || null
     }
   });
 });
+
+async function updateProcessingStage(
+  doc: Document,
+  job: ProcessingJob | undefined,
+  stage: ProcessingStage,
+  progressPercentage: number,
+  status?: DocumentStatus,
+  jobStatus: ProcessingJob['status'] = 'processing'
+): Promise<void> {
+  doc.currentStage = stage;
+  if (status) doc.status = status;
+  if (job) {
+    job.stage = stage;
+    job.status = jobStatus;
+    job.stage = stage;
+    job.progressPercentage = progressPercentage;
+    job.lastAttemptAt = new Date().toISOString();
+    if (jobStatus === 'processing' && !job.startedAt) job.startedAt = new Date().toISOString();
+    if (jobStatus === 'completed') job.completedAt = job.completedAt || new Date().toISOString();
+  }
+  await postgresDb.insertDocument(doc);
+  if (job) await postgresDb.insertProcessingJob(job);
+}
+
+async function markProcessingFailure(
+  doc: Document,
+  job: ProcessingJob | undefined,
+  error: unknown,
+  retryable: boolean
+): Promise<void> {
+  const reason = error instanceof Error ? error.message : String(error);
+  doc.status = 'failed';
+  if (job) {
+    job.status = 'failed';
+    job.stage = doc.currentStage;
+    job.failedAt = new Date().toISOString();
+    job.lastAttemptAt = job.failedAt;
+    job.retryable = retryable;
+    job.errorMessage = reason;
+  }
+  try {
+    await postgresDb.insertDocument(doc);
+    if (job) await postgresDb.insertProcessingJob(job);
+  } catch (persistError) {
+    console.error(`[PROCESSING] Could not persist failure for ${doc.id}:`, persistError);
+  }
+}
 
 // Helper function for processing document OpenCV Preprocessing & OCR from backend/uploads/
 async function processDocumentOCR(docId: string): Promise<{ document: Document; extractedFields: ExtractedField[] }> {
@@ -270,13 +656,11 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
 
   const job = db.processingJobs.find(j => j.documentId === docId);
 
+  // Reprocessing replaces generated observations but never human corrections or audit history.
+  await postgresDb.clearGeneratedArtifacts(doc.id);
+
   // Stage 1: Loading document (20%)
-  doc.status = 'preprocessing';
-  doc.currentStage = 'preprocessing';
-  if (job) {
-    job.status = 'processing';
-    job.progressPercentage = 20;
-  }
+    await updateProcessingStage(doc, job, 'preprocessing', 20, 'preprocessing');
 
   // Locate uploaded file in backend/uploads/ with path traversal protection
   const uploadDir = path.join(process.cwd(), 'backend', 'uploads');
@@ -299,8 +683,14 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
     doc.status = 'failed';
     if (job) {
       job.status = 'failed';
+      job.stage = 'preprocessing';
       job.errorMessage = 'Uploaded file not found on disk.';
+      job.failedAt = new Date().toISOString();
+      job.lastAttemptAt = job.failedAt;
+      job.retryable = true;
     }
+    await postgresDb.insertDocument(doc);
+    if (job) await postgresDb.insertProcessingJob(job);
     db.auditLogs.unshift({
       id: `audit-${Date.now()}`,
       userId: doc.uploadedBy || 'usr-001',
@@ -313,7 +703,7 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   }
 
   // Stage 2: Image quality analysis (35%)
-  if (job) job.progressPercentage = 35;
+    await updateProcessingStage(doc, job, 'quality_check', 35, 'preprocessing');
   const imageBuffer = fs.readFileSync(filePath);
 
   // Assess Image Quality (Laplacian blur, brightness, resolution)
@@ -321,7 +711,7 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   doc.imageQuality = qualityMetrics;
 
   // Stage 3: OpenCV Preprocessing Pipeline (50%)
-  if (job) job.progressPercentage = 50;
+    await updateProcessingStage(doc, job, 'ocr', 50, 'ocr_in_progress');
   const pipelineResult = await imagePreprocessor.executePipeline(imageBuffer, {
     enableDeskew: true,
     enablePerspective: true,
@@ -338,9 +728,15 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
 
     if (job) {
       job.status = 'failed';
+      job.stage = 'quality_check';
       job.progressPercentage = 50;
       job.errorMessage = `Quality Check Failed: ${qualityMetrics.qualityIssues.join('; ')}`;
+      job.failedAt = new Date().toISOString();
+      job.lastAttemptAt = job.failedAt;
+      job.retryable = false;
     }
+    await postgresDb.insertDocument(doc);
+    if (job) await postgresDb.insertProcessingJob(job);
 
     db.auditLogs.unshift({
       id: `audit-${Date.now()}`,
@@ -355,9 +751,7 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   }
 
   // Stage 5: OCR Execution (70%)
-  doc.status = 'ocr_in_progress';
-  doc.currentStage = 'ocr';
-  if (job) job.progressPercentage = 70;
+    await updateProcessingStage(doc, job, 'ocr', 70, 'ocr_in_progress');
 
   console.log(`[OCR] Starting OCR pipeline for documentId=${doc.id} using real Tesseract engine`);
 
@@ -377,6 +771,12 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   const predictions: Array<OCRPrediction & { documentId: string; croppedImagePath?: string }> = [];
   const validations: Array<any> = [];
   let totalConfidence = 0;
+
+  await updateProcessingStage(doc, job, 'extraction', 75, 'ocr_in_progress');
+
+  if (!template || !template.fields || template.fields.length === 0) {
+    throw new Error('Extraction failed: no configured template fields are available for this document.');
+  }
 
   if (template && template.fields) {
     for (const fld of template.fields) {
@@ -449,14 +849,18 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
       const ocrRes = await ocrManager.processRegionWithCascading(croppedImage, fld.fieldKey, fld.fieldType, doc.id);
       
       // Use the real OCR cleaned text as the source of truth
-      const val = ocrRes.prediction.cleanedText;
+      const rawCleanedValue = ocrRes.prediction.cleanedText;
+      const normalizedDate = fld.fieldType === 'date'
+        ? ValidationEngine.normalizeDate(rawCleanedValue)
+        : { value: rawCleanedValue };
+      const val = normalizedDate.value;
       const rawOcrText = ocrRes.prediction.rawText;
       const confidence = ocrRes.prediction.confidence;
 
       console.log(`[OCR] documentId=${doc.id} field="${fld.fieldKey}" rawText="${rawOcrText}" cleanedText="${val}" confidence=${confidence}`);
 
       // Stage 6: Validation (85%)
-      if (job) job.progressPercentage = 85;
+        await updateProcessingStage(doc, job, 'validation', 85, 'ocr_in_progress');
       const valRes = ValidationEngine.validateField(
         fld.fieldKey,
         fld.fieldType,
@@ -464,6 +868,11 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
         fld.validationRegex,
         confidence
       );
+      if (normalizedDate.error) {
+        valRes.isValid = false;
+        valRes.errorMessage = normalizedDate.error;
+        valRes.confidenceLevel = 'low';
+      }
 
       console.log(`[OCR] documentId=${doc.id} field="${fld.fieldKey}" validated=${valRes.isValid} level=${valRes.confidenceLevel}`);
 
@@ -504,6 +913,22 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   
   console.log(`[OCR] Pipeline completed for documentId=${doc.id}: ${extractedFields.length} fields extracted`);
 
+  // Replace generated observations while carrying forward the latest human value.
+  const latestCorrections = new Map<string, HumanCorrection>();
+  for (const correction of db.humanCorrections.filter(c => c.documentId === doc.id)) {
+    const previous = latestCorrections.get(correction.fieldKey);
+    if (!previous || correction.correctedAt > previous.correctedAt) latestCorrections.set(correction.fieldKey, correction);
+  }
+  for (const field of extractedFields) {
+    const correction = latestCorrections.get(field.fieldKey);
+    if (correction) {
+      field.finalValue = correction.correctedText;
+      field.isCorrected = true;
+      field.isValid = true;
+      field.validationMessage = undefined;
+    }
+  }
+
   // Update extracted fields database
   db.extractedFields = db.extractedFields.filter(f => f.documentId !== doc.id);
   db.extractedFields.push(...extractedFields);
@@ -512,20 +937,46 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   db.ocrPredictions.push(...predictions as OCRPrediction[]);
   db.fieldValidations.push(...validations);
 
-  // Stage 7: Completed (100%)
+  // Stage 7: only queue documents that have a non-accepted field. High-confidence
+  // valid fields are straight-through processed; no frontend inference is involved.
   const avgConfidence = extractedFields.length > 0 ? totalConfidence / extractedFields.length : 0.88;
-  doc.status = 'verification_required';
-  doc.currentStage = 'verification';
   doc.overallConfidence = Number(avgConfidence.toFixed(2));
+  const requiresVerification = documentRequiresVerification(extractedFields);
+  await updateProcessingStage(
+    doc,
+    job,
+    requiresVerification ? 'verification' : 'completed',
+    100,
+    requiresVerification ? 'verification_required' : 'verified',
+    'completed'
+  );
+  if (!requiresVerification) {
+    doc.verifiedAt = new Date().toISOString();
+    const record: StructuredRecord = {
+      id: `sr-${doc.id}`,
+      documentId: doc.id,
+      documentTypeCode: documentTypeCode(doc.documentTypeId),
+      payload: Object.fromEntries(extractedFields.map(field => [field.fieldKey, field.finalValue])),
+      isVerified: true,
+      createdAt: doc.verifiedAt
+    };
+    const existingRecord = db.structuredRecords.findIndex(item => item.documentId === doc.id);
+    if (existingRecord >= 0) db.structuredRecords[existingRecord] = record;
+    else db.structuredRecords.push(record);
+  }
 
   if (job) {
+    job.stage = 'verification';
     job.status = 'completed';
     job.progressPercentage = 100;
+    job.retryable = false;
     job.completedAt = new Date().toISOString();
   }
 
+  const pipelineAuditExists = db.auditLogs.some(log => log.action === 'PIPELINE_PROCESSING_COMPLETE' && log.resource === `Document ${doc.id}`)
+    || await postgresDb.hasAuditLog('PIPELINE_PROCESSING_COMPLETE', `Document ${doc.id}`);
   const auditLog: AuditLog = {
-    id: `audit-${Date.now()}`,
+    id: `audit-pipeline-${doc.id}`,
     userId: doc.uploadedBy || 'usr-001',
     action: 'PIPELINE_PROCESSING_COMPLETE',
     resource: `Document ${doc.id}`,
@@ -533,7 +984,7 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
     timestamp: new Date().toISOString()
   };
 
-  db.auditLogs.unshift(auditLog);
+  if (!pipelineAuditExists) db.auditLogs.unshift(auditLog);
 
   // Persist to PostgreSQL if connected
   console.log(`[PERSIST] documentId=${doc.id} postgresConnected=${postgresDb.isConnected}`);
@@ -541,19 +992,90 @@ async function processDocumentOCR(docId: string): Promise<{ document: Document; 
   if (job) await postgresDb.insertProcessingJob(job);
   await postgresDb.insertExtractedFields(extractedFields);
   await postgresDb.persistOcrArtifacts({ regions: detectedRegions, predictions, validations });
-  await postgresDb.insertAuditLog(auditLog);
+  if (!pipelineAuditExists) await postgresDb.insertAuditLog(auditLog);
   console.log(`[PERSIST] Completed for documentId=${doc.id} — ${extractedFields.length} fields saved`);
 
   return { document: doc, extractedFields };
 }
 
 // Document Processing API
-app.post('/api/documents/:id/process', async (req, res) => {
+app.post('/api/documents/:id/process', requireRole('admin', 'supervisor', 'verifier'), async (req, res) => {
   try {
+    const requestedDoc = db.documents.find(d => d.id === req.params.id);
+    if (!requestedDoc) {
+      return res.status(404).json({ success: false, error: 'Document not found' });
+    }
+    const requestedJob = requestedDoc ? db.processingJobs.find(j => j.documentId === requestedDoc.id) : undefined;
+    if (requestedDoc.status === 'verified' || requestedDoc.currentStage === 'completed') {
+      return res.status(409).json({ success: false, error: 'Document processing is already complete.' });
+    }
+    if (!requestedJob) {
+      return res.status(409).json({ success: false, error: 'Document has no processable processing job.' });
+    }
+    if (requestedJob.status === 'processing' || requestedJob.status === 'completed') {
+      return res.status(409).json({
+        success: false,
+        error: requestedJob.status === 'completed'
+          ? 'Document processing is already complete.'
+          : 'Document processing is already in progress.'
+      });
+    }
+    // Claim the in-memory job before awaiting any I/O so concurrent requests on
+    // this server instance cannot both enter the destructive OCR reset path.
+    requestedJob.status = 'processing';
+    requestedJob.lastAttemptAt = new Date().toISOString();
+    await postgresDb.insertProcessingJob(requestedJob);
     const result = await processDocumentOCR(req.params.id);
-    res.json({ success: true, data: { document: result.document, extractedFields: annotateNeedsManualCorrection(result.extractedFields) } });
+    res.json({ success: true, data: { document: result.document, extractedFields: annotateVerificationStatus(result.extractedFields) } });
   } catch (err: any) {
+    const doc = db.documents.find(d => d.id === req.params.id);
+    if (doc) await markProcessingFailure(doc, db.processingJobs.find(j => j.documentId === doc.id), err, true);
     res.status(500).json({ success: false, error: err.message || 'OCR processing failed' });
+  }
+});
+
+app.post('/api/queue/:jobId/retry', requireRole('admin', 'supervisor', 'verifier'), async (req, res) => {
+  const job = db.processingJobs.find(j => j.id === req.params.jobId);
+  if (!job) return res.status(404).json({ success: false, error: 'Processing job not found' });
+  const doc = db.documents.find(d => d.id === job.documentId);
+  if (!doc) return res.status(404).json({ success: false, error: 'Document not found for processing job' });
+  if (job.status !== 'failed' || !job.retryable) {
+    return res.status(409).json({ success: false, error: 'This processing failure is not retryable' });
+  }
+
+  try {
+    // Claim before the first await. A second retry now observes a non-failed
+    // job and cannot clear or regenerate the same document concurrently.
+    job.status = 'processing';
+    job.lastAttemptAt = new Date().toISOString();
+    await postgresDb.insertProcessingJob(job);
+    const generatedFieldIds = new Set(db.extractedFields.filter(f => f.documentId === doc.id).map(f => f.id));
+    db.extractedFields = db.extractedFields.filter(f => f.documentId !== doc.id);
+    db.detectedRegions = db.detectedRegions.filter(r => r.documentId !== doc.id);
+    db.ocrPredictions = db.ocrPredictions.filter(p => (p as any).documentId !== doc.id);
+    db.fieldValidations = db.fieldValidations.filter(v => !generatedFieldIds.has((v as any).extractedFieldId));
+    await postgresDb.clearGeneratedArtifacts(doc.id);
+
+    const now = new Date().toISOString();
+    job.retryCount += 1;
+    job.status = 'processing';
+    job.stage = 'queued';
+    job.progressPercentage = 0;
+    job.errorMessage = undefined;
+    job.failedAt = undefined;
+    job.completedAt = undefined;
+    job.lastAttemptAt = now;
+    job.retryable = true;
+    doc.status = 'uploaded';
+    doc.currentStage = 'queued';
+    await postgresDb.insertDocument(doc);
+    await postgresDb.insertProcessingJob(job);
+
+    const result = await processDocumentOCR(doc.id);
+    res.json({ success: true, data: { document: result.document, job, extractedFields: annotateVerificationStatus(result.extractedFields) } });
+  } catch (err: any) {
+    await markProcessingFailure(doc, job, err, true);
+    res.status(500).json({ success: false, error: err.message || 'Retry processing failed' });
   }
 });
 
@@ -563,7 +1085,7 @@ const handleUploadMiddleware = upload.fields([
   { name: 'document', maxCount: 1 }
 ]);
 
-app.post('/api/documents/upload', (req, res) => {
+app.post('/api/documents/upload', requireRole('admin', 'supervisor', 'verifier'), (req, res) => {
   handleUploadMiddleware(req, res, async (err: any) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -596,7 +1118,21 @@ app.post('/api/documents/upload', (req, res) => {
 
     try {
       const documentTypeId = req.body.documentTypeId || 'dt-visitor';
-      const uploadedBy = req.body.userId || 'usr-001';
+      const uploadedBy = (req as AuthenticatedRequest).auth!.userId;
+      const idempotencyKey = (req.header('Idempotency-Key') || '').trim();
+      const contentHash = crypto.createHash('sha256').update(fs.readFileSync(uploadedFile.path)).digest('hex');
+      const existing = db.documents.find(doc => doc.documentTypeId === documentTypeId && (
+        (idempotencyKey && (doc as any).idempotencyKey === idempotencyKey) || (doc as any).contentHash === contentHash
+      ));
+      if (existing) {
+        // This file is only the staged retry payload. Preserve the existing
+        // document/workflow and discard the transient duplicate upload.
+        fs.unlinkSync(uploadedFile.path);
+        return res.status(200).json({ success: true, idempotent: true, data: {
+          document: attachExtractedFieldsToDocument(existing),
+          extractedFields: annotateVerificationStatus(db.extractedFields.filter(f => f.documentId === existing.id))
+        }});
+      }
 
       const docId = `doc-${Date.now()}`;
       const template = db.documentTemplates.find(t => t.documentTypeId === documentTypeId) || db.documentTemplates[0];
@@ -609,7 +1145,7 @@ app.post('/api/documents/upload', (req, res) => {
         documentTypeId,
         templateId: template?.id,
         status: 'uploaded',
-        currentStage: 'quality_check',
+        currentStage: 'queued',
         overallConfidence: 0.0,
         isDuplicate: false,
         imageQuality: {
@@ -626,17 +1162,27 @@ app.post('/api/documents/upload', (req, res) => {
         },
         uploadedBy,
         uploadedAt: new Date().toISOString(),
-        visitorName: req.body.visitorName || undefined,
-        mobileNumber: req.body.mobileNumber || undefined,
-        visitDate: req.body.visitDate || undefined,
-        hostEmployeeId: req.body.hostEmployeeId || undefined,
-        vehicleRegistrationNumber: req.body.vehicleRegistrationNumber || undefined,
-        passIssueQuality: req.body.passIssueQuality || undefined
+        visitor_name: req.body.visitor_name || req.body.visitorName || undefined,
+        visitorName: req.body.visitor_name || req.body.visitorName || undefined,
+        mobile_number: req.body.mobile_number || req.body.mobileNumber || undefined,
+        mobileNumber: req.body.mobile_number || req.body.mobileNumber || undefined,
+        visit_date: req.body.visit_date || req.body.visitDate || undefined,
+        visitDate: req.body.visit_date || req.body.visitDate || undefined,
+        host_employee_id: req.body.host_employee_id || req.body.hostEmployeeId || undefined,
+        hostEmployeeId: req.body.host_employee_id || req.body.hostEmployeeId || undefined,
+        vehicle_number: req.body.vehicle_number || req.body.vehicleNumber || req.body.vehicleRegistrationNumber || req.body.vehicle_registration || undefined,
+        vehicleNumber: req.body.vehicle_number || req.body.vehicleNumber || req.body.vehicleRegistrationNumber || req.body.vehicle_registration || undefined,
+        vehicleRegistrationNumber: req.body.vehicle_number || req.body.vehicleNumber || req.body.vehicleRegistrationNumber || req.body.vehicle_registration || undefined,
+        passes_issued_quantity: req.body.passes_issued_quantity || req.body.passesIssuedQuantity || req.body.passIssueQuality || req.body.pass_issue_quality || undefined,
+        passesIssuedQuantity: req.body.passes_issued_quantity || req.body.passesIssuedQuantity || req.body.passIssueQuality || req.body.pass_issue_quality || undefined,
+        passIssueQuality: req.body.passes_issued_quantity || req.body.passesIssuedQuantity || req.body.passIssueQuality || req.body.pass_issue_quality || undefined
       };
 
       // Attach file path details for disk reading
       (newDoc as any).storedFileName = uploadedFile.filename;
       (newDoc as any).storedFilePath = uploadedFile.path;
+      (newDoc as any).idempotencyKey = idempotencyKey || undefined;
+      (newDoc as any).contentHash = contentHash;
 
       db.documents.unshift(newDoc);
 
@@ -648,8 +1194,11 @@ app.post('/api/documents/upload', (req, res) => {
         id: jobId,
         documentId: docId,
         jobType: 'ocr_ingestion' as const,
+        stage: 'queued',
         status: 'queued' as const,
         progressPercentage: 0,
+        retryCount: 0,
+        retryable: true,
         startedAt: new Date().toISOString()
       });
 
@@ -681,6 +1230,7 @@ app.post('/api/documents/upload', (req, res) => {
         });
       } catch (ocrErr) {
         console.error(`[OCR] Pipeline error for documentId=${docId}:`, ocrErr);
+        await markProcessingFailure(newDoc, db.processingJobs.find(j => j.documentId === docId), ocrErr, true);
       }
 
       return res.status(200).json({
@@ -691,17 +1241,26 @@ app.post('/api/documents/upload', (req, res) => {
             fileName: newDoc.fileName,
             documentTypeId: newDoc.documentTypeId,
             status: newDoc.status,
+            currentStage: newDoc.currentStage,
             uploadedAt: newDoc.uploadedAt,
             fileSize: newDoc.fileSize,
             mimeType: newDoc.mimeType,
+            visitor_name: newDoc.visitor_name || newDoc.visitorName,
             visitorName: newDoc.visitorName,
+            mobile_number: newDoc.mobile_number || newDoc.mobileNumber,
             mobileNumber: newDoc.mobileNumber,
+            visit_date: newDoc.visit_date || newDoc.visitDate,
             visitDate: newDoc.visitDate,
+            host_employee_id: newDoc.host_employee_id || newDoc.hostEmployeeId,
             hostEmployeeId: newDoc.hostEmployeeId,
+            vehicle_number: newDoc.vehicle_number || newDoc.vehicleNumber,
+            vehicleNumber: newDoc.vehicleNumber,
             vehicleRegistrationNumber: newDoc.vehicleRegistrationNumber,
+            passes_issued_quantity: newDoc.passes_issued_quantity || newDoc.passesIssuedQuantity,
+            passesIssuedQuantity: newDoc.passesIssuedQuantity,
             passIssueQuality: newDoc.passIssueQuality
           },
-          extractedFields: annotateNeedsManualCorrection(extractedFields)
+          extractedFields: annotateVerificationStatus(extractedFields)
         }
       });
     } catch (err: any) {
@@ -718,18 +1277,25 @@ app.post('/api/documents/upload', (req, res) => {
 app.post('/api/ocr/recognize', async (req, res) => {
   try {
     const { imageBase64, fieldKey, engine } = req.body;
+    if (!imageBase64 || typeof imageBase64 !== 'string' || imageBase64.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'imageBase64 is required and must contain a valid image'
+      });
+    }
+
     const key = fieldKey || 'sample_field';
 
     if (engine === 'trocr') {
       const trocrService = new TrOCRService();
-      const prediction = await trocrService.recognizeRegion(imageBase64 || '', key);
+      const prediction = await trocrService.recognizeRegion(imageBase64, key);
       return res.json({ success: true, data: { prediction, engine: 'TrOCR Transformer' } });
     } else if (engine === 'paddle') {
       const paddleService = new PaddleOCRService();
-      const prediction = await paddleService.recognizeRegion(imageBase64 || '', key);
+      const prediction = await paddleService.recognizeRegion(imageBase64, key);
       return res.json({ success: true, data: { prediction, engine: 'Tesseract.js fallback (PaddleOCR unavailable)' } });
     } else {
-      const result = await ocrManager.processRegionWithCascading(imageBase64 || '', key);
+      const result = await ocrManager.processRegionWithCascading(imageBase64, key);
       return res.json({ success: true, data: result });
     }
   } catch (err: any) {
@@ -740,14 +1306,21 @@ app.post('/api/ocr/recognize', async (req, res) => {
 app.post('/api/ocr/compare', async (req, res) => {
   try {
     const { imageBase64, fieldKey } = req.body;
+    if (!imageBase64 || typeof imageBase64 !== 'string' || imageBase64.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        error: 'imageBase64 is required and must contain a valid image'
+      });
+    }
+
     const key = fieldKey || 'sample_field';
 
     const paddleService = new PaddleOCRService();
     const trocrService = new TrOCRService();
 
     const [paddlePred, trocrPred] = await Promise.all([
-      paddleService.recognizeRegion(imageBase64 || '', key),
-      trocrService.recognizeRegion(imageBase64 || '', key)
+      paddleService.recognizeRegion(imageBase64, key),
+      trocrService.recognizeRegion(imageBase64, key)
     ]);
 
     res.json({
@@ -766,11 +1339,11 @@ app.post('/api/ocr/compare', async (req, res) => {
 });
 
 // Batch Upload Ingestion API
-app.post('/api/documents/batch-upload', upload.array('documents', 10), async (req, res) => {
+app.post('/api/documents/batch-upload', requireRole('admin', 'supervisor', 'verifier'), upload.array('documents', 10), async (req, res) => {
   try {
     const files = (req.files as Express.Multer.File[]) || [];
     const documentTypeId = req.body.documentTypeId || 'dt-visitor';
-    const uploadedBy = req.body.userId || 'usr-001';
+    const uploadedBy = (req as AuthenticatedRequest).auth!.userId;
 
     const processedDocs = [];
 
@@ -855,15 +1428,27 @@ app.get('/api/documents/:id/pages', (req, res) => {
 });
 
 // 3. Human Verification API - Submit Field Corrections
-app.post('/api/verification/correct', async (req, res) => {
+app.post('/api/verification/correct', requireRole('admin', 'supervisor', 'verifier'), async (req, res) => {
   try {
-    const { documentId, corrections, userId } = req.body;
+    const { documentId, corrections } = req.body;
+    const userId = (req as AuthenticatedRequest).auth!.userId;
 
     if (!documentId || typeof documentId !== 'string' || !Array.isArray(corrections)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid request payload. documentId (string) and corrections (array) are required.'
       });
+    }
+
+    const correctionKeys = new Set<string>();
+    for (const correction of corrections) {
+      if (!correction || typeof correction.fieldKey !== 'string' ||
+          !CANONICAL_FIELD_KEYS.has(correction.fieldKey) ||
+          typeof correction.correctedText !== 'string' ||
+          correction.correctedText.trim() === '' || correctionKeys.has(correction.fieldKey)) {
+        return res.status(400).json({ success: false, error: 'Invalid corrections. Use each canonical field key once with a non-empty correctedText.' });
+      }
+      correctionKeys.add(correction.fieldKey);
     }
 
     const doc = db.documents.find(d => d.id === documentId);
@@ -875,10 +1460,38 @@ app.post('/api/verification/correct', async (req, res) => {
 
     const updatedFields: ExtractedField[] = [];
     const persistedCorrections: HumanCorrection[] = [];
+    const auditLogs: AuditLog[] = [];
+    const canonicalFieldKeys = new Set([
+      'visitor_name', 'mobile_number', 'visit_date', 'host_employee_id',
+      'vehicle_number', 'passes_issued_quantity'
+    ]);
+    const seenFieldKeys = new Set<string>();
 
     for (const corr of corrections) {
+      if (!corr || typeof corr.fieldKey !== 'string' || typeof corr.correctedText !== 'string' ||
+          !canonicalFieldKeys.has(corr.fieldKey) || seenFieldKeys.has(corr.fieldKey)) {
+        continue;
+      }
+      seenFieldKeys.add(corr.fieldKey);
       const field = db.extractedFields.find(f => f.documentId === documentId && f.fieldKey === corr.fieldKey);
-      if (field) {
+      if (!field) {
+        return res.status(400).json({ success: false, error: `Field ${corr.fieldKey} is not present on this document.` });
+      }
+      const templateField = db.templateFields.find(template => template.id === field.templateFieldId);
+      const normalized: { value: string; error?: string } = templateField?.fieldType === 'date'
+        ? ValidationEngine.normalizeDate(corr.correctedText)
+        : { value: corr.correctedText.trim() };
+      const validation = ValidationEngine.validateField(
+        field.fieldKey, templateField?.fieldType || 'text', normalized.value,
+        templateField?.validationRegex, field.confidence
+      );
+      if (normalized.error || !validation.isValid) {
+        return res.status(400).json({ success: false, error: normalized.error || validation.errorMessage || `Invalid value for ${field.label}.` });
+      }
+      corr.correctedText = normalized.value;
+      // A correction audit event exists only when the human value differs from
+      // the original immutable OCR prediction.
+      if (field && corr.correctedText !== field.finalValue) {
         console.log(`[VERIFY] documentId=${documentId} field="${corr.fieldKey}" ocr="${field.ocrValue}" → corrected="${corr.correctedText}"`);
         const hcItem: HumanCorrection = {
           id: `hc-${Date.now()}-${corr.fieldKey}`,
@@ -897,13 +1510,50 @@ app.post('/api/verification/correct', async (req, res) => {
         db.humanCorrections.push(hcItem);
         persistedCorrections.push(hcItem);
 
+        const timestamp = hcItem.correctedAt;
+        auditLogs.push({
+          id: `audit-${Date.now()}-${corr.fieldKey}`,
+          userId: hcItem.correctedBy,
+          action: 'HUMAN_FIELD_CORRECTED',
+          resource: `Document ${documentId}`,
+          details: `Human corrected ${corr.fieldKey} for document ${doc.fileName}.`,
+          timestamp,
+          documentId,
+          fieldKey: corr.fieldKey,
+          originalOcrValue: field.ocrValue,
+          correctedValue: corr.correctedText,
+          notes: corr.notes || undefined
+        });
+
         // Update final value in extracted field
         field.finalValue = corr.correctedText;
-        field.isCorrected = true;
+        field.isCorrected = corr.correctedText !== field.ocrValue;
         field.isValid = true;
         field.validationMessage = undefined;
         updatedFields.push(field);
       }
+    }
+
+    // Update direct document fields so doc reflects human corrections immediately
+    const vNameField = updatedFields.find(f => f.fieldKey === 'visitor_name');
+    if (vNameField) { doc.visitor_name = vNameField.finalValue; doc.visitorName = vNameField.finalValue; }
+    const mNumField = updatedFields.find(f => f.fieldKey === 'mobile_number');
+    if (mNumField) { doc.mobile_number = mNumField.finalValue; doc.mobileNumber = mNumField.finalValue; }
+    const vDateField = updatedFields.find(f => f.fieldKey === 'visit_date');
+    if (vDateField) { doc.visit_date = vDateField.finalValue; doc.visitDate = vDateField.finalValue; }
+    const hEmpField = updatedFields.find(f => f.fieldKey === 'host_employee_id');
+    if (hEmpField) { doc.host_employee_id = hEmpField.finalValue; doc.hostEmployeeId = hEmpField.finalValue; }
+    const vNumField = updatedFields.find(f => f.fieldKey === 'vehicle_number');
+    if (vNumField) { doc.vehicle_number = vNumField.finalValue; doc.vehicleNumber = vNumField.finalValue; doc.vehicleRegistrationNumber = vNumField.finalValue; }
+    const pQtyField = updatedFields.find(f => f.fieldKey === 'passes_issued_quantity');
+    if (pQtyField) { doc.passes_issued_quantity = pQtyField.finalValue; doc.passesIssuedQuantity = pQtyField.finalValue; doc.passIssueQuality = pQtyField.finalValue; }
+    for (const field of db.extractedFields.filter(f => f.documentId === documentId && CANONICAL_FIELD_KEYS.has(f.fieldKey))) {
+      if (field.fieldKey === 'visitor_name') { doc.visitor_name = field.finalValue; doc.visitorName = field.finalValue; }
+      if (field.fieldKey === 'mobile_number') { doc.mobile_number = field.finalValue; doc.mobileNumber = field.finalValue; }
+      if (field.fieldKey === 'visit_date') { doc.visit_date = field.finalValue; doc.visitDate = field.finalValue; }
+      if (field.fieldKey === 'host_employee_id') { doc.host_employee_id = field.finalValue; doc.hostEmployeeId = field.finalValue; }
+      if (field.fieldKey === 'vehicle_number') { doc.vehicle_number = field.finalValue; doc.vehicleNumber = field.finalValue; doc.vehicleRegistrationNumber = field.finalValue; }
+      if (field.fieldKey === 'passes_issued_quantity') { doc.passes_issued_quantity = field.finalValue; doc.passesIssuedQuantity = field.finalValue; doc.passIssueQuality = field.finalValue; }
     }
 
     // Update Document Status
@@ -912,16 +1562,21 @@ app.post('/api/verification/correct', async (req, res) => {
     doc.verifiedBy = userId || 'usr-002';
     doc.verifiedAt = new Date().toISOString();
 
-    // Audit Log
-    const auditLog: AuditLog = {
-      id: `audit-${Date.now()}`,
-      userId: userId || 'usr-002',
-      action: 'HUMAN_VERIFICATION_COMPLETE',
-      resource: `Document ${documentId}`,
-      details: `Verified ${corrections.length} fields for document ${doc.fileName}. Status set to verified.`,
-      timestamp: new Date().toISOString()
-    };
-    db.auditLogs.unshift(auditLog);
+    db.auditLogs.unshift(...auditLogs);
+    const verificationAuditExists = db.auditLogs.some(log => log.action === 'HUMAN_VERIFICATION_COMPLETE' && log.resource === `Document ${documentId}`)
+      || await postgresDb.hasAuditLog('HUMAN_VERIFICATION_COMPLETE', `Document ${documentId}`);
+    if (!verificationAuditExists) {
+      auditLogs.push({
+        id: `audit-verification-${documentId}`,
+        userId: userId || 'usr-002',
+        action: 'HUMAN_VERIFICATION_COMPLETE',
+        resource: `Document ${documentId}`,
+        details: `Document ${doc.fileName} verified with ${updatedFields.length} corrected fields.`,
+        timestamp: doc.verifiedAt!,
+        documentId
+      });
+    }
+
     const structured: StructuredRecord = {
       id: `sr-${documentId}`,
       documentId,
@@ -933,7 +1588,16 @@ app.post('/api/verification/correct', async (req, res) => {
     const existingRecord = db.structuredRecords.findIndex(r => r.documentId === documentId);
     if (existingRecord >= 0) db.structuredRecords[existingRecord] = structured;
     else db.structuredRecords.push(structured);
-    await postgresDb.persistVerification(doc, updatedFields, persistedCorrections, structured, auditLog);
+    await postgresDb.persistVerification(doc, updatedFields, persistedCorrections, structured, auditLogs);
+    const verificationJob = db.processingJobs.find(j => j.documentId === documentId);
+    if (verificationJob) {
+      verificationJob.stage = 'completed';
+      verificationJob.status = 'completed';
+      verificationJob.progressPercentage = 100;
+      verificationJob.retryable = false;
+      verificationJob.completedAt = verificationJob.completedAt || new Date().toISOString();
+      await postgresDb.insertProcessingJob(verificationJob);
+    }
 
     res.json({ success: true, message: 'Document verification saved successfully.' });
   } catch (err: any) {
@@ -946,19 +1610,32 @@ app.get('/api/templates', (req, res) => {
   res.json({ success: true, data: db.documentTemplates });
 });
 
-app.post('/api/templates', (req, res) => {
-  const { name, documentTypeId, fields } = req.body;
-  const newTpl = {
-    id: `tpl-${Date.now()}`,
-    documentTypeId,
-    name,
-    version: '1.0.0',
-    description: 'Custom configured template',
-    fields,
-    createdAt: new Date().toISOString()
-  };
-  db.documentTemplates.unshift(newTpl);
-  res.json({ success: true, data: newTpl });
+app.post('/api/templates', requireRole('admin'), (req, res) => {
+  const { id, name, documentTypeId, fields, version, description } = req.body;
+  const existingIdx = id ? db.documentTemplates.findIndex(t => t.id === id) : -1;
+  if (existingIdx >= 0) {
+    db.documentTemplates[existingIdx] = {
+      ...db.documentTemplates[existingIdx],
+      name: name ?? db.documentTemplates[existingIdx].name,
+      documentTypeId: documentTypeId ?? db.documentTemplates[existingIdx].documentTypeId,
+      version: version ?? db.documentTemplates[existingIdx].version,
+      description: description ?? db.documentTemplates[existingIdx].description,
+      fields: fields ?? db.documentTemplates[existingIdx].fields
+    };
+    return res.json({ success: true, data: db.documentTemplates[existingIdx] });
+  } else {
+    const newTpl = {
+      id: id || `tpl-${Date.now()}`,
+      documentTypeId,
+      name,
+      version: version || '1.0.0',
+      description: description || 'Custom configured template',
+      fields,
+      createdAt: new Date().toISOString()
+    };
+    db.documentTemplates.unshift(newTpl);
+    return res.json({ success: true, data: newTpl });
+  }
 });
 
 // 5. Processing Queue API
@@ -968,7 +1645,9 @@ app.get('/api/queue', (req, res) => {
     return {
       ...j,
       documentName: doc?.fileName || 'Unknown File',
-      documentStatus: doc?.status
+      documentStatus: doc?.status,
+      currentStage: doc?.currentStage || j.stage,
+      stage: doc?.currentStage || j.stage || 'queued'
     };
   });
   res.json({ success: true, data: jobs });
@@ -981,13 +1660,26 @@ app.get('/api/models', (req, res) => {
 
 app.get('/api/models/evaluation', (req, res) => {
   const totalFields = db.extractedFields.length;
-  const correctedFields = db.humanCorrections.length;
-  const hcr = totalFields > 0 ? Number(((correctedFields / totalFields) * 100).toFixed(2)) : 0;
+  // Fields requiring human verification: low confidence, invalid type rule, or flagged for review
+  const fieldsRequiringVerification = db.extractedFields.filter(
+    f => !f.isValid || (typeof f.confidence === 'number' && f.confidence < HIGH_CONFIDENCE_THRESHOLD) || f.isCorrected || db.humanCorrections.some(c => c.fieldKey === f.fieldKey && c.documentId === f.documentId)
+  ).length;
+
+  // Unique corrected fields across stored documents
+  const correctedFields = db.extractedFields.filter(
+    f => f.isCorrected || db.humanCorrections.some(c => c.fieldKey === f.fieldKey && c.documentId === f.documentId)
+  ).length || db.humanCorrections.length;
+
+  // HCR = (corrected fields / fields requiring human verification) * 100
+  const verificationPool = Math.max(fieldsRequiringVerification, correctedFields, 1);
+  const actualCorrected = Math.min(correctedFields, verificationPool);
+  const hcr = Number(((actualCorrected / verificationPool) * 100).toFixed(1));
   
   // Calculate average CER, WER, and exact field accuracy across models
   const report = {
     totalEvaluatedFields: totalFields,
-    humanCorrectionsCount: correctedFields,
+    fieldsRequiringVerification: verificationPool,
+    humanCorrectionsCount: actualCorrected,
     humanCorrectionRatePercent: hcr,
     models: db.modelVersions.map(m => ({
       id: m.id,
@@ -1014,7 +1706,7 @@ app.get('/api/models/evaluation', (req, res) => {
   res.json({ success: true, data: report });
 });
 
-app.post('/api/models/calculate-metrics', (req, res) => {
+app.post('/api/models/calculate-metrics', requireRole('admin', 'supervisor'), (req, res) => {
   const { referenceText, predictionText } = req.body;
   const ref = (referenceText || '').trim();
   const pred = (predictionText || '').trim();
@@ -1055,7 +1747,7 @@ app.post('/api/models/calculate-metrics', (req, res) => {
   });
 });
 
-app.post('/api/models/onnx-export', (req, res) => {
+app.post('/api/models/onnx-export', requireRole('admin'), (req, res) => {
   const { modelId, opsetVersion } = req.body;
   const model = db.modelVersions.find(m => m.id === modelId) || db.modelVersions[0];
 
@@ -1100,16 +1792,16 @@ with open("paddleocr_v6_fp16.engine", "rb") as f, trt.Runtime(logger) as runtime
 
 // 7. Dataset Manager API
 app.get('/api/datasets', (req, res) => {
-  res.json({ success: true, data: db.datasetVersions });
+  res.json({ success: true, data: db.datasetVersions.filter(dataset => dataset.id !== 'ds-v1') });
 });
 
-app.post('/api/datasets/generate', (req, res) => {
+app.post('/api/datasets/generate', requireRole('admin', 'supervisor'), (req, res) => {
   const { name, documentTypeId } = req.body;
   const newDs = {
     id: `ds-${Date.now()}`,
     name: name || 'Custom Golden Verification Dataset',
     version: `v1.${db.datasetVersions.length + 1}-2026`,
-    sampleCount: db.humanCorrections.length * 4 + 100,
+    sampleCount: db.humanCorrections.length,
     correctedSamplesCount: db.humanCorrections.length,
     documentTypeId: documentTypeId || 'dt-visitor',
     downloadUrl: `/api/datasets/export/jsonl`,
@@ -1137,18 +1829,20 @@ app.get('/api/datasets/:id/manifest', (req, res) => {
 });
 
 // 8. Export Center API & CSV / Excel Downloads
-app.get('/api/export/download/:format', (req, res) => {
+app.get('/api/export/download/:format', requireRole('admin', 'supervisor', 'auditor'), async (req, res) => {
   const { format } = req.params;
-  const docs = db.documents;
-  const fields = db.extractedFields;
+  const docs = getActiveDocuments().filter(doc => doc.status === 'verified').map(attachExtractedFieldsToDocument);
+  const activeDocumentIds = new Set(docs.map(doc => doc.id));
+  const fields = db.extractedFields.filter(f => activeDocumentIds.has(f.documentId) && CANONICAL_FIELD_KEYS.has(f.fieldKey));
 
   if (format === 'csv') {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="verified_extracted_data_${Date.now()}.csv"`);
     
-    let csvContent = 'Document ID,File Name,Field Key,Raw OCR Value,Final Value,Confidence,Is Valid,Status,Uploaded At\n';
+    let csvContent = 'Document ID,File Name,Field Key,Raw OCR Value,Final Value,Confidence,Is Valid,Is Corrected,Correction User,Correction At,Correction Notes,Status,Uploaded At\n';
     fields.forEach(f => {
       const doc = docs.find(d => d.id === f.documentId);
+      const correction = getLatestHumanCorrection(f.documentId, f.fieldKey);
       const row = [
         `"${f.documentId}"`,
         `"${doc?.fileName || ''}"`,
@@ -1157,6 +1851,10 @@ app.get('/api/export/download/:format', (req, res) => {
         `"${(f.finalValue || '').replace(/"/g, '""')}"`,
         f.confidence,
         f.isValid,
+        f.isCorrected,
+        `"${correction?.correctedBy || ''}"`,
+        `"${correction?.correctedAt || ''}"`,
+        `"${(correction?.notes || '').replace(/"/g, '""')}"`,
         `"${doc?.status || 'processed'}"`,
         `"${doc?.uploadedAt || ''}"`
       ].join(',');
@@ -1171,6 +1869,7 @@ app.get('/api/export/download/:format', (req, res) => {
       details: `User exported ${fields.length} extracted field records as CSV format.`,
       timestamp: new Date().toISOString()
     });
+    await postgresDb.insertAuditLog(db.auditLogs[0]);
 
     return res.status(200).send(csvContent);
   }
@@ -1178,16 +1877,30 @@ app.get('/api/export/download/:format', (req, res) => {
   if (format === 'json') {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="verified_extracted_data_${Date.now()}.json"`);
-    return res.status(200).json(fields.map(f => ({ document: docs.find(d => d.id === f.documentId), field: f })));
+    db.auditLogs.unshift({
+      id: `audit-${Date.now()}`,
+      userId: 'usr-001',
+      action: 'EXPORT_JSON_DOWNLOADED',
+      resource: `JSON Export (${fields.length} rows)`,
+      details: `User exported ${fields.length} extracted field records as JSON format.`,
+      timestamp: new Date().toISOString()
+    });
+    await postgresDb.insertAuditLog(db.auditLogs[0]);
+    return res.status(200).json(fields.map(f => ({
+      document: docs.find(d => d.id === f.documentId),
+      field: f,
+      humanCorrection: getLatestHumanCorrection(f.documentId, f.fieldKey) || null
+    })));
   }
 
   if (format === 'excel' || format === 'xlsx') {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="verified_extracted_data_${Date.now()}.csv"`);
     
-    let csvContent = 'Document ID,File Name,Field Key,Raw OCR Value,Final Value,Confidence,Is Valid,Status,Uploaded At\n';
+    let csvContent = 'Document ID,File Name,Field Key,Raw OCR Value,Final Value,Confidence,Is Valid,Is Corrected,Correction User,Correction At,Correction Notes,Status,Uploaded At\n';
     fields.forEach(f => {
       const doc = docs.find(d => d.id === f.documentId);
+      const correction = getLatestHumanCorrection(f.documentId, f.fieldKey);
       const row = [
         `"${f.documentId}"`,
         `"${doc?.fileName || ''}"`,
@@ -1196,6 +1909,10 @@ app.get('/api/export/download/:format', (req, res) => {
         `"${(f.finalValue || '').replace(/"/g, '""')}"`,
         f.confidence,
         f.isValid,
+        f.isCorrected,
+        `"${correction?.correctedBy || ''}"`,
+        `"${correction?.correctedAt || ''}"`,
+        `"${(correction?.notes || '').replace(/"/g, '""')}"`,
         `"${doc?.status || 'processed'}"`,
         `"${doc?.uploadedAt || ''}"`
       ].join(',');
@@ -1210,6 +1927,7 @@ app.get('/api/export/download/:format', (req, res) => {
       details: `User generated spreadsheet export for ${fields.length} extracted field records.`,
       timestamp: new Date().toISOString()
     });
+    await postgresDb.insertAuditLog(db.auditLogs[0]);
 
     return res.status(200).send(csvContent);
   }
@@ -1217,20 +1935,26 @@ app.get('/api/export/download/:format', (req, res) => {
   res.status(400).json({ success: false, error: 'Unsupported format requested. Supported formats: csv, excel, json' });
 });
 
-app.post('/api/export', async (req, res) => {
+app.post('/api/export', requireRole('admin', 'supervisor', 'auditor'), async (req, res) => {
   const { format, documentIds } = req.body;
-  const fmt = (format || 'csv').toLowerCase();
+  const fmt = (typeof format === 'string' ? format.toLowerCase() : 'csv') as 'csv' | 'excel' | 'json';
+  if (!['csv', 'excel', 'json'].includes(fmt)) {
+    return res.status(400).json({ success: false, error: 'Unsupported format requested. Supported formats: csv, excel, json' });
+  }
+  if (documentIds !== undefined && (!Array.isArray(documentIds) || !documentIds.every(id => typeof id === 'string' && getActiveDocuments().some(doc => doc.id === id)))) {
+    return res.status(400).json({ success: false, error: 'documentIds must be an array of known document IDs.' });
+  }
   
   const job = {
     id: `exp-${Date.now()}`,
     format: fmt,
-    documentCount: documentIds ? documentIds.length : db.documents.length,
+    documentCount: documentIds ? documentIds.length : getActiveDocuments().length,
     status: 'completed' as const,
     fileUrl: `/api/export/download/${fmt}`,
     createdAt: new Date().toISOString()
   };
   db.exportJobs.unshift(job);
-  if (fmt === 'csv' || fmt === 'json') await postgresDb.insertExportJob(job);
+  await postgresDb.insertExportJob(job);
 
   db.auditLogs.unshift({
     id: `audit-${Date.now()}`,
@@ -1240,6 +1964,7 @@ app.post('/api/export', async (req, res) => {
     details: `Created export package in ${fmt} format for ${job.documentCount} documents.`,
     timestamp: new Date().toISOString()
   });
+  await postgresDb.insertAuditLog(db.auditLogs[0]);
 
   res.json({ success: true, data: job });
 });
@@ -1258,7 +1983,7 @@ app.get('/api/duplicates', (req, res) => {
   res.json({ success: true, count: matches.length, data: matches });
 });
 
-app.post('/api/duplicates/check', async (req, res) => {
+app.post('/api/duplicates/check', requireRole('admin', 'supervisor', 'verifier'), async (req, res) => {
   const { documentId } = req.body;
   const targetDoc = db.documents.find(d => d.id === documentId);
   if (!targetDoc) {
@@ -1267,11 +1992,11 @@ app.post('/api/duplicates/check', async (req, res) => {
 
   // Deterministic field-value similarity; threshold is explicit configuration.
   // It deliberately uses verified/current application values and performs no OCR.
-  const potentialMatches = db.documents.filter(d => d.id !== documentId);
+  const potentialMatches = getActiveDocuments().filter(d => d.id !== documentId);
   const threshold = Number(process.env.DUPLICATE_SIMILARITY_THRESHOLD || '0.75');
-  const target = new Map(db.extractedFields.filter(f => f.documentId === documentId).map(f => [f.fieldKey, f.finalValue.trim().toLowerCase()]));
+  const target = new Map(db.extractedFields.filter(f => f.documentId === documentId && CANONICAL_FIELD_KEYS.has(f.fieldKey)).map(f => [f.fieldKey, f.finalValue.trim().toLowerCase()]));
   const scored = potentialMatches.map(candidate => {
-    const values = db.extractedFields.filter(f => f.documentId === candidate.id);
+    const values = db.extractedFields.filter(f => f.documentId === candidate.id && CANONICAL_FIELD_KEYS.has(f.fieldKey));
     const comparable = values.filter(f => target.has(f.fieldKey));
     const matches = comparable.filter(f => target.get(f.fieldKey) === f.finalValue.trim().toLowerCase()).length;
     return { candidate, score: comparable.length ? matches / comparable.length : 0, compared: comparable.length };
@@ -1279,6 +2004,12 @@ app.post('/api/duplicates/check', async (req, res) => {
   const matched = scored && scored.score >= threshold ? scored.candidate : undefined;
 
   if (matched) {
+    const existingMatch = db.duplicateMatches.find(m =>
+      m.documentId === documentId && m.matchedDocumentId === matched.id
+    );
+    if (existingMatch) {
+      return res.json({ success: true, isDuplicate: true, match: existingMatch });
+    }
     const duplicateMatch = {
       id: `dup-${Date.now()}`,
       documentId,
@@ -1299,6 +2030,8 @@ app.post('/api/duplicates/check', async (req, res) => {
       details: `Identified ${(scored!.score * 100).toFixed(1)}% field-value similarity with Document ${matched.id}.`,
       timestamp: new Date().toISOString()
     });
+    await postgresDb.insertDocument(targetDoc);
+    await postgresDb.insertAuditLog(db.auditLogs[0]);
 
     return res.json({ success: true, isDuplicate: true, match: duplicateMatch });
   }
@@ -1344,31 +2077,23 @@ app.get('/api/docs/swagger.json', (req, res) => {
 });
 
 // 11. Audit Logs API
-app.get('/api/audit-logs', (req, res) => {
-  res.json({ success: true, count: db.auditLogs.length, data: db.auditLogs });
+app.get('/api/audit-logs', async (req, res) => {
+  const auditLogs = postgresDb.isConnected ? await postgresDb.getAuditLogs() : db.auditLogs;
+  res.json({ success: true, count: auditLogs.length, data: auditLogs });
 });
-
-// 12. Background Worker Jobs Simulation
-setInterval(() => {
-  // Process queued background jobs in processing queue
-  const pendingJob = db.processingJobs.find(j => j.status === 'queued');
-  if (pendingJob) {
-    pendingJob.status = 'processing';
-    pendingJob.progressPercentage = 50;
-    setTimeout(() => {
-      pendingJob.status = 'completed';
-      pendingJob.progressPercentage = 100;
-      pendingJob.completedAt = new Date().toISOString();
-    }, 1500);
-  }
-}, 5000);
 
 // ==============================================================================
 // VITE MIDDLEWARE & SERVING
 // ==============================================================================
 async function startServer() {
   await postgresDb.initialize();
-  if (postgresDb.isConnected) await postgresDb.syncReferenceData();
+  if (!postgresDb.isConnected && process.env.NODE_ENV === 'production') {
+    throw new Error('PostgreSQL is required in production; refusing to start with an in-memory persistence fallback.');
+  }
+  if (postgresDb.isConnected) {
+    await postgresDb.syncReferenceData();
+    await postgresDb.syncCanonicalDocumentFields();
+  }
 
   // Restore real uploaded documents from PostgreSQL into in-memory store on boot
   // This ensures previously uploaded documents survive server restarts
@@ -1377,6 +2102,10 @@ async function startServer() {
       const pgDocs = await postgresDb.getDocuments();
       const pgFields = await postgresDb.getExtractedFields();
       const pgCorrections = await postgresDb.getHumanCorrections();
+      const pgJobs = await postgresDb.getProcessingJobs();
+      const pgStructuredRecords = await postgresDb.getStructuredRecords();
+      const pgDuplicateMatches = await postgresDb.getDuplicateMatches();
+      const pgExportJobs = await postgresDb.getExportJobs();
 
       // Only restore docs that were actually uploaded (not seed data with static IDs)
       // Seed docs have IDs like 'doc-1001', 'doc-1002'. Real uploads use 'doc-<timestamp>'
@@ -1409,22 +2138,71 @@ async function startServer() {
         }
       }
 
-      console.log(`[RESTORE] PostgreSQL→Memory: ${restoredDocs} documents, ${restoredFields} extracted fields, ${restoredCorrections} corrections restored on boot.`);
+      let restoredJobs = 0;
+      for (const pgJob of pgJobs) {
+        const restoredDoc = db.documents.find(d => d.id === pgJob.documentId);
+        let jobChanged = false;
+        if (restoredDoc && pgJob.stage !== restoredDoc.currentStage) {
+          pgJob.stage = restoredDoc.currentStage;
+          jobChanged = true;
+        }
+        if (pgJob.status === 'completed' && pgJob.retryable) {
+          pgJob.retryable = false;
+          jobChanged = true;
+        }
+        if (jobChanged) {
+          await postgresDb.insertProcessingJob(pgJob);
+        }
+        const existsInMemory = db.processingJobs.find(j => j.id === pgJob.id);
+        if (!existsInMemory) {
+          db.processingJobs.push(pgJob);
+          restoredJobs++;
+        }
+      }
+
+      for (const record of pgStructuredRecords) {
+        const existsInMemory = db.structuredRecords.find(r => r.id === record.id);
+        if (!existsInMemory) db.structuredRecords.push(record);
+      }
+      for (const match of pgDuplicateMatches) {
+        const existsInMemory = db.duplicateMatches.find(m => m.id === match.id);
+        if (!existsInMemory) db.duplicateMatches.push(match);
+        const duplicateDoc = db.documents.find(d => d.id === match.documentId);
+        if (duplicateDoc) duplicateDoc.isDuplicate = true;
+      }
+      for (const exportJob of pgExportJobs) {
+        const existsInMemory = db.exportJobs.find(j => j.id === exportJob.id);
+        if (!existsInMemory) db.exportJobs.push(exportJob);
+      }
+
+      console.log(`[RESTORE] PostgreSQL→Memory: ${restoredDocs} documents, ${restoredFields} extracted fields, ${restoredCorrections} corrections, ${restoredJobs} processing jobs, ${pgStructuredRecords.length} structured records, ${pgDuplicateMatches.length} duplicate matches, ${pgExportJobs.length} export jobs restored on boot.`);
     } catch (restoreErr) {
       console.error('[RESTORE] Failed to restore data from PostgreSQL:', restoreErr);
     }
   }
+
+  const apiUnknownRouteHandler = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (req.originalUrl === '/api' || req.originalUrl.startsWith('/api/')) {
+      return res.status(404).json({ success: false, error: 'Endpoint not found.' });
+    }
+    next();
+  };
 
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'
     });
+    app.use(apiUnknownRouteHandler);
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
+    app.use(apiUnknownRouteHandler);
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
+      if (req.originalUrl === '/api' || req.originalUrl.startsWith('/api/')) {
+        return res.status(404).json({ success: false, error: 'Endpoint not found.' });
+      }
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

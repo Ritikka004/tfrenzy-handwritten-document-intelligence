@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sliders, Plus, Save, Layers, CheckCircle2, Trash2 } from 'lucide-react';
 import { DocumentTemplate, TemplateField, FieldType } from '../types/index.ts';
+import { HIGH_CONFIDENCE_THRESHOLD, MEDIUM_CONFIDENCE_THRESHOLD } from '../constants/confidence.ts';
 
 // ─── Realistic mock templates (used when backend is offline) ─────────────────
 const MOCK_TEMPLATES: DocumentTemplate[] = [
@@ -16,12 +17,12 @@ const MOCK_TEMPLATES: DocumentTemplate[] = [
         id:             'fld-001',
         templateId:     'tpl-mock-001',
         fieldKey:       'visitor_name',
-        label:          'Visitor Name',
+        label:          'Visitor Full Name',
         fieldType:      'name',
         isRequired:     true,
-        validationRegex: '^[A-Za-z .]{2,80}$',
+        validationRegex: '^[A-Za-z\\s\\.\'-]{2,50}$',
         minConfidence:  0.85,
-        boundingBox:    { x: 10, y: 12, width: 40, height: 8 },
+        boundingBox:    { x: 7.60, y: 19.34, width: 39.36, height: 7.83 },
       },
       {
         id:             'fld-002',
@@ -31,19 +32,19 @@ const MOCK_TEMPLATES: DocumentTemplate[] = [
         fieldType:      'phone',
         isRequired:     true,
         validationRegex: '^[6-9]\\d{9}$',
-        minConfidence:  0.90,
-        boundingBox:    { x: 10, y: 22, width: 30, height: 8 },
+        minConfidence:  0.85,
+        boundingBox:    { x: 53.87, y: 19.34, width: 39.36, height: 7.83 },
       },
       {
         id:             'fld-003',
         templateId:     'tpl-mock-001',
         fieldKey:       'visit_date',
-        label:          'Visit Date',
+        label:          'Date of Visit',
         fieldType:      'date',
         isRequired:     true,
-        validationRegex: '^\\d{4}-\\d{2}-\\d{2}$',
-        minConfidence:  0.95,
-        boundingBox:    { x: 55, y: 12, width: 35, height: 8 },
+        validationRegex: '^(\\d{4}-\\d{2}-\\d{2}|\\d{2}\\/\\d{2}\\/\\d{4})$',
+        minConfidence:  0.85,
+        boundingBox:    { x: 7.60, y: 32.69, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-004',
@@ -52,30 +53,31 @@ const MOCK_TEMPLATES: DocumentTemplate[] = [
         label:          'Host Employee ID',
         fieldType:      'employee_id',
         isRequired:     true,
-        validationRegex: '^EMP-\\d{4}$',
-        minConfidence:  0.90,
-        boundingBox:    { x: 10, y: 32, width: 30, height: 8 },
+        validationRegex: '^EMP[ -]?[0-9\\-]{3,10}$',
+        minConfidence:  0.80,
+        boundingBox:    { x: 53.87, y: 32.69, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-005',
         templateId:     'tpl-mock-001',
-        fieldKey:       'vehicle_registration',
+        fieldKey:       'vehicle_number',
         label:          'Vehicle Registration Number',
         fieldType:      'vehicle_number',
         isRequired:     false,
-        validationRegex: '^[A-Z]{2}\\d{2}[A-Z]{1,2}\\d{4}$',
+        validationRegex: '^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$',
         minConfidence:  0.80,
-        boundingBox:    { x: 10, y: 42, width: 35, height: 8 },
+        boundingBox:    { x: 7.60, y: 46.04, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-006',
         templateId:     'tpl-mock-001',
-        fieldKey:       'pass_issue_quality',
-        label:          'Pass Issue Quality',
-        fieldType:      'checklist',
+        fieldKey:       'passes_issued_quantity',
+        label:          'Passes Issued Quantity',
+        fieldType:      'quantity',
         isRequired:     true,
+        validationRegex: '^(?!0+$)\\d{1,4}$',
         minConfidence:  0.85,
-        boundingBox:    { x: 55, y: 22, width: 35, height: 8 },
+        boundingBox:    { x: 53.87, y: 46.04, width: 39.36, height: 7.37 },
       },
     ],
   },
@@ -185,8 +187,16 @@ export const TemplateConfigView: React.FC<TemplateConfigViewProps> = ({ template
             <span>Document Template &amp; Field Boundary Configuration</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Define bounding boxes, field validation regex patterns, and confidence threshold gates per form type.
+            Define bounding boxes, field validation regex patterns, and minimum extraction confidence gates per form type.
           </p>
+          <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400 font-mono">
+            <span className="text-slate-500">Global Classification:</span>
+            <span className="text-emerald-400 font-bold">High &gt;= {Math.round(HIGH_CONFIDENCE_THRESHOLD * 100)}%</span>
+            <span className="text-slate-600">|</span>
+            <span className="text-amber-400 font-bold">Medium {Math.round(MEDIUM_CONFIDENCE_THRESHOLD * 100)}–{Math.round(HIGH_CONFIDENCE_THRESHOLD * 100) - 1}%</span>
+            <span className="text-slate-600">|</span>
+            <span className="text-rose-400 font-bold">Low &lt; {Math.round(MEDIUM_CONFIDENCE_THRESHOLD * 100)}%</span>
+          </div>
         </div>
 
         <button
@@ -271,13 +281,13 @@ export const TemplateConfigView: React.FC<TemplateConfigViewProps> = ({ template
                       <option value="phone">Phone (10 Digits)</option>
                       <option value="date">Date (ISO)</option>
                       <option value="employee_id">Employee ID</option>
-                      <option value="vehicle_number">Vehicle Reg</option>
+                      <option value="vehicle_number">Vehicle Registration Number</option>
                       <option value="quantity">Quantity (Positive Int)</option>
                       <option value="checklist">Checklist (Boolean)</option>
                     </select>
                   </div>
                   <div>
-                    <span className="text-slate-500">Min Confidence</span>
+                    <span className="text-slate-500">Minimum Extraction Confidence</span>
                     <input
                       type="number"
                       step="0.05"
@@ -295,7 +305,7 @@ export const TemplateConfigView: React.FC<TemplateConfigViewProps> = ({ template
                   <div>
                     <span className="text-slate-500">BBox (x, y, w, h %)</span>
                     <div className="text-[10px] font-mono text-slate-400 p-1 bg-slate-900 rounded border border-slate-800">
-                      {fld.boundingBox.x}%, {fld.boundingBox.y}%, {fld.boundingBox.width}%
+                      {fld.boundingBox.x}%, {fld.boundingBox.y}%, {fld.boundingBox.width}%, {fld.boundingBox.height}%
                     </div>
                   </div>
                 </div>

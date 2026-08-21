@@ -4,7 +4,8 @@ import { db } from './database.ts';
 import { postgresId } from './postgresIdentity.ts';
 import {
   User, DocumentType, DocumentTemplate, TemplateField, Document,
-  ProcessingJob, ExtractedField, HumanCorrection, AuditLog
+  ProcessingJob, ExtractedField, HumanCorrection, AuditLog, StructuredRecord,
+  DuplicateMatch, ExportJob
 } from '../../src/types/index.ts';
 
 dotenv.config();
@@ -29,8 +30,8 @@ export class PostgresDatabaseService {
     const password = process.env.POSTGRES_PASSWORD || 'securepassword';
 
     this.pool = connectionString
-      ? new Pool({ connectionString, connectionTimeoutMillis: 2000 })
-      : new Pool({ host, port, database, user, password, connectionTimeoutMillis: 2000 });
+      ? new Pool({ connectionString, connectionTimeoutMillis: 10000, idleTimeoutMillis: 30000, max: 20 })
+      : new Pool({ host, port, database, user, password, connectionTimeoutMillis: 10000, idleTimeoutMillis: 30000, max: 20 });
   }
 
   public async initialize(): Promise<boolean> {
@@ -46,8 +47,12 @@ export class PostgresDatabaseService {
           email VARCHAR(255) UNIQUE NOT NULL,
           name VARCHAR(255) NOT NULL,
           role VARCHAR(50) NOT NULL,
+          password_hash TEXT,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
 
         CREATE TABLE IF NOT EXISTS document_types (
           id VARCHAR(255) PRIMARY KEY,
@@ -130,12 +135,22 @@ export class PostgresDatabaseService {
           id VARCHAR(255) PRIMARY KEY,
           document_id VARCHAR(255) NOT NULL,
           job_type VARCHAR(50) NOT NULL,
+          stage VARCHAR(50) NOT NULL DEFAULT 'queued',
           status VARCHAR(50) NOT NULL DEFAULT 'queued',
           progress_percentage INT DEFAULT 0,
           started_at TIMESTAMP WITH TIME ZONE,
           completed_at TIMESTAMP WITH TIME ZONE,
+          last_attempt_at TIMESTAMP WITH TIME ZONE,
+          failed_at TIMESTAMP WITH TIME ZONE,
+          retry_count INT NOT NULL DEFAULT 0,
+          retryable BOOLEAN NOT NULL DEFAULT TRUE,
           error_message TEXT
         );
+        ALTER TABLE processing_jobs ADD COLUMN IF NOT EXISTS stage VARCHAR(50) NOT NULL DEFAULT 'queued';
+        ALTER TABLE processing_jobs ADD COLUMN IF NOT EXISTS last_attempt_at TIMESTAMP WITH TIME ZONE;
+        ALTER TABLE processing_jobs ADD COLUMN IF NOT EXISTS failed_at TIMESTAMP WITH TIME ZONE;
+        ALTER TABLE processing_jobs ADD COLUMN IF NOT EXISTS retry_count INT NOT NULL DEFAULT 0;
+        ALTER TABLE processing_jobs ADD COLUMN IF NOT EXISTS retryable BOOLEAN NOT NULL DEFAULT TRUE;
 
         CREATE TABLE IF NOT EXISTS detected_regions (
           id VARCHAR(255) PRIMARY KEY,
@@ -264,7 +279,12 @@ export class PostgresDatabaseService {
           action VARCHAR(100) NOT NULL,
           resource VARCHAR(100) NOT NULL,
           details TEXT,
-          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          document_id VARCHAR(255),
+          field_key VARCHAR(100),
+          original_ocr_value TEXT,
+          corrected_value TEXT,
+          notes TEXT
         );
 
         CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);
@@ -353,8 +373,15 @@ export class PostgresDatabaseService {
         ALTER TABLE documents ADD COLUMN IF NOT EXISTS vehicle_registration_number VARCHAR(100);
         ALTER TABLE documents ADD COLUMN IF NOT EXISTS pass_issue_quality VARCHAR(100);
         ALTER TABLE extracted_fields ADD COLUMN IF NOT EXISTS region_box JSONB;
+        ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS document_id VARCHAR(255);
+        ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS field_key VARCHAR(100);
+        ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS original_ocr_value TEXT;
+        ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS corrected_value TEXT;
+        ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS notes TEXT;
         CREATE UNIQUE INDEX IF NOT EXISTS uq_documents_application_id ON documents(application_id) WHERE application_id IS NOT NULL;
+        CREATE UNIQUE INDEX IF NOT EXISTS uq_processing_jobs_document_id ON processing_jobs(document_id);
         CREATE INDEX IF NOT EXISTS idx_ocr_predictions_document_id ON ocr_predictions(document_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_logs_document_id ON audit_logs(document_id);
 
         -- Provenance links are deliberately constrained so an OCR artifact cannot
         -- outlive the document/region/field observation it describes.
@@ -417,13 +444,31 @@ export class PostgresDatabaseService {
           doc.fileSize, doc.mimeType, postgresId('document_types', doc.documentTypeId), doc.templateId ? postgresId('document_templates', doc.templateId) : null, doc.status,
           doc.currentStage, doc.overallConfidence, doc.isDuplicate, JSON.stringify(doc.imageQuality || {}),
           postgresId('users', doc.uploadedBy), doc.uploadedAt, doc.visitorName || null, doc.mobileNumber || null,
-          doc.visitDate || null, doc.hostEmployeeId || null, doc.vehicleRegistrationNumber || null,
-          doc.passIssueQuality || null
+          doc.visitDate || null, doc.hostEmployeeId || null, (doc.vehicleNumber || doc.vehicleRegistrationNumber || null),
+          (doc.passesIssuedQuantity || doc.passIssueQuality || null)
         ]
       );
     } catch (err) {
       this.throwWriteError('Inserting document', err);
     }
+  }
+
+  public async findUserByEmail(email: string): Promise<{ id: string; email: string; name: string; role: string; passwordHash: string; isActive: boolean } | null> {
+    if (!this.isConnected || !this.pool) return null;
+    const result = await this.pool.query(
+      'SELECT id,email,name,role,password_hash,is_active FROM users WHERE lower(email) = lower($1) LIMIT 1', [email]
+    );
+    const user = result.rows[0];
+    return user ? { id: user.id, email: user.email, name: user.name, role: user.role, passwordHash: user.password_hash || '', isActive: user.is_active !== false } : null;
+  }
+
+  public async createUser(user: { id: string; email: string; name: string; role: string; createdAt: string }, passwordHash: string): Promise<void> {
+    if (!this.isConnected || !this.pool) throw new Error('PostgreSQL is unavailable');
+    await this.pool.query(
+      `INSERT INTO users (id,email,name,role,password_hash,is_active,created_at)
+       VALUES ($1,$2,$3,$4,$5,TRUE,$6)`,
+      [user.id, user.email, user.name, user.role, passwordHash, user.createdAt]
+    );
   }
 
   /** Mirrors only the in-memory reference configuration needed by UUID FKs. */
@@ -442,10 +487,25 @@ export class PostgresDatabaseService {
         `INSERT INTO document_templates (id,document_type_id,name,version,description,sample_image_url,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name,version=EXCLUDED.version,description=EXCLUDED.description`,
         [postgresId('document_templates', template.id), postgresId('document_types', template.documentTypeId), template.name, template.version, template.description, template.sampleImageUrl || null, template.createdAt]);
       for (const field of db.templateFields) await client.query(
-        `INSERT INTO template_fields (id,template_id,field_key,label,field_type,validation_regex,is_required,min_confidence,bbox_x,bbox_y,bbox_width,bbox_height) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (id) DO UPDATE SET label=EXCLUDED.label,validation_regex=EXCLUDED.validation_regex`,
+        `INSERT INTO template_fields (id,template_id,field_key,label,field_type,validation_regex,is_required,min_confidence,bbox_x,bbox_y,bbox_width,bbox_height) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (id) DO UPDATE SET field_key=EXCLUDED.field_key,label=EXCLUDED.label,validation_regex=EXCLUDED.validation_regex`,
         [postgresId('template_fields', field.id), postgresId('document_templates', field.templateId), field.fieldKey, field.label, field.fieldType, field.validationRegex || null, field.isRequired, field.minConfidence, field.boundingBox.x, field.boundingBox.y, field.boundingBox.width, field.boundingBox.height]);
       await client.query('COMMIT');
     } catch (err) { await client.query('ROLLBACK'); this.throwWriteError('Synchronizing reference data', err); } finally { client.release(); }
+  }
+
+  /** Backfills denormalized document values from canonical extracted fields without touching legacy fields. */
+  public async syncCanonicalDocumentFields(): Promise<void> {
+    if (!this.isConnected || !this.pool) return;
+    await this.pool.query(`
+      UPDATE documents d
+      SET visitor_name = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'visitor_name' ORDER BY f.id DESC LIMIT 1), d.visitor_name),
+          mobile_number = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'mobile_number' ORDER BY f.id DESC LIMIT 1), d.mobile_number),
+          visit_date = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'visit_date' ORDER BY f.id DESC LIMIT 1), d.visit_date),
+          host_employee_id = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'host_employee_id' ORDER BY f.id DESC LIMIT 1), d.host_employee_id),
+          vehicle_registration_number = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'vehicle_number' ORDER BY f.id DESC LIMIT 1), d.vehicle_registration_number),
+          pass_issue_quality = COALESCE((SELECT f.final_value FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key = 'passes_issued_quantity' ORDER BY f.id DESC LIMIT 1), d.pass_issue_quality)
+      WHERE EXISTS (SELECT 1 FROM extracted_fields f WHERE f.document_id = d.id AND f.field_key IN ('visitor_name','mobile_number','visit_date','host_employee_id','vehicle_number','passes_issued_quantity'))
+    `);
   }
 
   public async getDocuments(): Promise<Document[]> {
@@ -472,7 +532,9 @@ export class PostgresDatabaseService {
         mobileNumber: r.mobile_number,
         visitDate: r.visit_date,
         hostEmployeeId: r.host_employee_id,
+        vehicleNumber: r.vehicle_registration_number,
         vehicleRegistrationNumber: r.vehicle_registration_number,
+        passesIssuedQuantity: r.pass_issue_quality,
         passIssueQuality: r.pass_issue_quality
       }));
     } catch (err) {
@@ -485,14 +547,19 @@ export class PostgresDatabaseService {
     if (!this.isConnected || !this.pool) return;
     try {
       await this.pool.query(
-        `INSERT INTO processing_jobs (id, document_id, job_type, status, progress_percentage, started_at, completed_at, error_message)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO processing_jobs (id, document_id, job_type, stage, status, progress_percentage, started_at, completed_at, last_attempt_at, failed_at, retry_count, retryable, error_message)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
          ON CONFLICT (id) DO UPDATE SET
+           stage = EXCLUDED.stage,
            status = EXCLUDED.status,
            progress_percentage = EXCLUDED.progress_percentage,
            completed_at = EXCLUDED.completed_at,
+           last_attempt_at = EXCLUDED.last_attempt_at,
+           failed_at = EXCLUDED.failed_at,
+           retry_count = EXCLUDED.retry_count,
+           retryable = EXCLUDED.retryable,
            error_message = EXCLUDED.error_message`,
-        [postgresId('processing_jobs', job.id), postgresId('documents', job.documentId), job.jobType, job.status, job.progressPercentage, job.startedAt || null, job.completedAt || null, job.errorMessage || null]
+        [postgresId('processing_jobs', job.id), postgresId('documents', job.documentId), job.jobType, job.stage, job.status, job.progressPercentage, job.startedAt || null, job.completedAt || null, job.lastAttemptAt || null, job.failedAt || null, job.retryCount, job.retryable, job.errorMessage || null]
       );
     } catch (err) {
       this.throwWriteError('Inserting processing job', err);
@@ -502,15 +569,20 @@ export class PostgresDatabaseService {
   public async getProcessingJobs(): Promise<ProcessingJob[]> {
     if (!this.isConnected || !this.pool) return [];
     try {
-      const res = await this.pool.query('SELECT * FROM processing_jobs ORDER BY started_at DESC');
+      const res = await this.pool.query('SELECT p.*, d.application_id FROM processing_jobs p LEFT JOIN documents d ON d.id = p.document_id ORDER BY p.started_at DESC');
       return res.rows.map(r => ({
         id: r.id,
-        documentId: r.document_id,
+        documentId: r.application_id || r.document_id,
         jobType: r.job_type,
+        stage: r.stage || 'queued',
         status: r.status,
         progressPercentage: Number(r.progress_percentage),
         startedAt: r.started_at,
         completedAt: r.completed_at,
+        lastAttemptAt: r.last_attempt_at,
+        failedAt: r.failed_at,
+        retryCount: Number(r.retry_count || 0),
+        retryable: r.retryable !== false,
         errorMessage: r.error_message
       }));
     } catch (err) {
@@ -543,6 +615,22 @@ export class PostgresDatabaseService {
     }
   }
 
+  public async clearGeneratedArtifacts(documentId: string): Promise<void> {
+    if (!this.isConnected || !this.pool) return;
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('DELETE FROM field_validations WHERE extracted_field_id IN (SELECT id FROM extracted_fields WHERE document_id = $1)', [postgresId('documents', documentId)]);
+      await client.query('DELETE FROM ocr_predictions WHERE document_id = $1', [postgresId('documents', documentId)]);
+      await client.query('DELETE FROM detected_regions WHERE document_id = $1', [postgresId('documents', documentId)]);
+      await client.query('DELETE FROM extracted_fields WHERE document_id = $1', [postgresId('documents', documentId)]);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      this.throwWriteError('Clearing retryable OCR artifacts', err);
+    } finally { client.release(); }
+  }
+
   /** Persists observations made by the existing pipeline; it never invokes OCR. */
   public async persistOcrArtifacts(artifacts: {
     regions: any[]; predictions: any[]; validations: Array<any & { extractedFieldId: string }>;
@@ -573,16 +661,55 @@ export class PostgresDatabaseService {
     } finally { client.release(); }
   }
 
-  public async persistVerification(doc: Document, fields: ExtractedField[], corrections: HumanCorrection[], structured: any, audit: AuditLog): Promise<void> {
+  public async persistVerification(doc: Document, fields: ExtractedField[], corrections: HumanCorrection[], structured: any, auditLogs: AuditLog[]): Promise<void> {
     if (!this.isConnected || !this.pool) return;
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query(`UPDATE documents SET status=$2, current_stage=$3, verified_by=$4, verified_at=$5 WHERE id=$1`, [postgresId('documents', doc.id), doc.status, doc.currentStage, doc.verifiedBy ? postgresId('users', doc.verifiedBy) : null, doc.verifiedAt || null]);
-      for (const f of fields) await client.query(`UPDATE extracted_fields SET final_value=$2,is_corrected=$3,is_valid=$4,validation_message=$5 WHERE id=$1`, [postgresId('extracted_fields', f.id), f.finalValue, f.isCorrected, f.isValid, f.validationMessage || null]);
+      const vName = (doc as any).visitor_name || doc.visitorName || null;
+      const mNum = (doc as any).mobile_number || doc.mobileNumber || null;
+      const vDate = (doc as any).visit_date || doc.visitDate || null;
+      const hEmp = (doc as any).host_employee_id || doc.hostEmployeeId || null;
+      const vReg = (doc as any).vehicle_number || doc.vehicleNumber || doc.vehicleRegistrationNumber || null;
+      const pQty = (doc as any).passes_issued_quantity || doc.passesIssuedQuantity || doc.passIssueQuality || null;
+      // Verification can be performed on an in-memory queue item as well as on
+      // an uploaded document. Ensure that existing document is represented in
+      // the same PostgreSQL transaction before dependent corrections/audits.
+      await client.query(
+        `INSERT INTO documents (id,application_id,file_name,stored_file_name,stored_file_path,file_size,mime_type,document_type_id,template_id,status,current_stage,overall_confidence,is_duplicate,image_quality,uploaded_by,uploaded_at,verified_by,verified_at,visitor_name,mobile_number,visit_date,host_employee_id,vehicle_registration_number,pass_issue_quality)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+         ON CONFLICT (id) DO NOTHING`,
+        [postgresId('documents', doc.id), doc.id, doc.fileName, (doc as any).storedFileName || null, (doc as any).storedFilePath || null,
+          doc.fileSize, doc.mimeType, postgresId('document_types', doc.documentTypeId), doc.templateId ? postgresId('document_templates', doc.templateId) : null,
+          doc.status, doc.currentStage, doc.overallConfidence, doc.isDuplicate, JSON.stringify(doc.imageQuality || {}),
+          postgresId('users', doc.uploadedBy), doc.uploadedAt, doc.verifiedBy ? postgresId('users', doc.verifiedBy) : null, doc.verifiedAt || null,
+          vName, mNum, vDate, hEmp, vReg, pQty]
+      );
+      for (const f of fields) {
+        await client.query(
+          `INSERT INTO extracted_fields (id,document_id,template_field_id,field_key,label,ocr_value,final_value,confidence,confidence_level,is_valid,validation_message,is_corrected,region_box)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+           ON CONFLICT (id) DO UPDATE SET final_value=EXCLUDED.final_value,is_corrected=EXCLUDED.is_corrected,is_valid=EXCLUDED.is_valid,validation_message=EXCLUDED.validation_message`,
+          [postgresId('extracted_fields', f.id), postgresId('documents', f.documentId), f.templateFieldId ? postgresId('template_fields', f.templateFieldId) : null,
+            f.fieldKey, f.label, f.ocrValue, f.finalValue, f.confidence, f.confidenceLevel, f.isValid,
+            f.validationMessage || null, f.isCorrected, JSON.stringify(f.regionBox || {})]
+        );
+      }
+      await client.query(
+        `UPDATE documents SET status=$2, current_stage=$3, verified_by=$4, verified_at=$5, visitor_name=$6, mobile_number=$7, visit_date=$8, host_employee_id=$9, vehicle_registration_number=$10, pass_issue_quality=$11 WHERE id=$1`,
+        [postgresId('documents', doc.id), doc.status, doc.currentStage, doc.verifiedBy ? postgresId('users', doc.verifiedBy) : null, doc.verifiedAt || null, vName, mNum, vDate, hEmp, vReg, pQty]
+      );
       for (const c of corrections) await client.query(`INSERT INTO human_corrections (id,document_id,field_key,original_ocr_text,corrected_text,confidence,model_version,corrected_by,corrected_at,notes) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING`, [postgresId('human_corrections',c.id),postgresId('documents',c.documentId),c.fieldKey,c.originalOcrText,c.correctedText,c.confidence,c.modelVersion,c.correctedBy ? postgresId('users',c.correctedBy) : null,c.correctedAt,c.notes || null]);
       await client.query(`INSERT INTO structured_records (id,document_id,document_type_code,payload,is_verified,created_at) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (document_id) DO UPDATE SET payload=EXCLUDED.payload,is_verified=EXCLUDED.is_verified`, [postgresId('structured_records',structured.id),postgresId('documents',structured.documentId),structured.documentTypeCode,JSON.stringify(structured.payload),structured.isVerified,structured.createdAt]);
-      await client.query(`INSERT INTO audit_logs (id,user_id,action,resource,details,timestamp) VALUES ($1,$2,$3,$4,$5,$6)`, [postgresId('audit_logs',audit.id),audit.userId ? postgresId('users',audit.userId) : null,audit.action,audit.resource,audit.details,audit.timestamp]);
+      for (const audit of auditLogs) {
+        await client.query(
+          `INSERT INTO audit_logs (id,user_id,action,resource,details,timestamp,document_id,field_key,original_ocr_value,corrected_value,notes)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+          [postgresId('audit_logs', audit.id), audit.userId ? postgresId('users', audit.userId) : null,
+            audit.action, audit.resource, audit.details, audit.timestamp, audit.documentId || null,
+            audit.fieldKey || null, audit.originalOcrValue || null, audit.correctedValue || null, audit.notes || null]
+        );
+      }
       await client.query('COMMIT');
     } catch (err) { await client.query('ROLLBACK'); this.throwWriteError('Persisting verification transaction', err); } finally { client.release(); }
   }
@@ -722,12 +849,78 @@ export class PostgresDatabaseService {
     if (!this.isConnected || !this.pool) return;
     try {
       await this.pool.query(
-        `INSERT INTO audit_logs (id, user_id, action, resource, details, timestamp)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [postgresId('audit_logs', log.id), log.userId ? postgresId('users', log.userId) : null, log.action, log.resource, log.details, log.timestamp]
+        `INSERT INTO audit_logs (id,user_id,action,resource,details,timestamp,document_id,field_key,original_ocr_value,corrected_value,notes)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [postgresId('audit_logs', log.id), log.userId ? postgresId('users', log.userId) : null,
+          log.action, log.resource, log.details, log.timestamp, log.documentId || null,
+          log.fieldKey || null, log.originalOcrValue || null, log.correctedValue || null, log.notes || null]
       );
     } catch (err) {
       this.throwWriteError('Inserting audit log', err);
+    }
+  }
+
+  public async hasAuditLog(action: string, resource: string): Promise<boolean> {
+    if (!this.isConnected || !this.pool) return false;
+    const result = await this.pool.query('SELECT 1 FROM audit_logs WHERE action = $1 AND resource = $2 LIMIT 1', [action, resource]);
+    return result.rowCount > 0;
+  }
+
+  public async getStructuredRecords(): Promise<StructuredRecord[]> {
+    if (!this.isConnected || !this.pool) return [];
+    try {
+      const res = await this.pool.query('SELECT s.*, d.application_id FROM structured_records s JOIN documents d ON d.id=s.document_id ORDER BY s.created_at DESC');
+      return res.rows.map(r => ({
+        id: r.id,
+        documentId: r.application_id || r.document_id,
+        documentTypeCode: r.document_type_code,
+        payload: r.payload || {},
+        isVerified: r.is_verified,
+        createdAt: r.created_at
+      }));
+    } catch (err) {
+      console.error('[PostgreSQL] Error fetching structured records:', err);
+      return [];
+    }
+  }
+
+  public async getDuplicateMatches(): Promise<DuplicateMatch[]> {
+    if (!this.isConnected || !this.pool) return [];
+    try {
+      const res = await this.pool.query(`SELECT m.*, d1.application_id AS document_application_id, d2.application_id AS matched_application_id
+        FROM duplicate_matches m
+        JOIN documents d1 ON d1.id=m.document_id
+        JOIN documents d2 ON d2.id=m.matched_document_id
+        ORDER BY m.detected_at DESC`);
+      return res.rows.map(r => ({
+        id: r.id,
+        documentId: r.document_application_id || r.document_id,
+        matchedDocumentId: r.matched_application_id || r.matched_document_id,
+        similarityScore: Number(r.similarity_score),
+        matchReason: r.match_reason,
+        detectedAt: r.detected_at
+      }));
+    } catch (err) {
+      console.error('[PostgreSQL] Error fetching duplicate matches:', err);
+      return [];
+    }
+  }
+
+  public async getExportJobs(): Promise<ExportJob[]> {
+    if (!this.isConnected || !this.pool) return [];
+    try {
+      const res = await this.pool.query('SELECT * FROM export_jobs ORDER BY created_at DESC');
+      return res.rows.map(r => ({
+        id: r.id,
+        format: r.format,
+        documentCount: Number(r.document_count),
+        status: r.status,
+        fileUrl: r.file_url || undefined,
+        createdAt: r.created_at
+      }));
+    } catch (err) {
+      console.error('[PostgreSQL] Error fetching export jobs:', err);
+      return [];
     }
   }
 
@@ -741,7 +934,12 @@ export class PostgresDatabaseService {
         action: r.action,
         resource: r.resource,
         details: r.details,
-        timestamp: r.timestamp
+        timestamp: r.timestamp,
+        documentId: r.document_id || undefined,
+        fieldKey: r.field_key || undefined,
+        originalOcrValue: r.original_ocr_value || undefined,
+        correctedValue: r.corrected_value || undefined,
+        notes: r.notes || undefined
       }));
     } catch (err) {
       console.error('[PostgreSQL] Error fetching audit logs:', err);

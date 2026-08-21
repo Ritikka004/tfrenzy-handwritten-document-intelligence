@@ -4,11 +4,10 @@ import {
   FileSpreadsheet,
   FileCode,
   CheckCircle2,
-  Server,
   RefreshCw
 } from 'lucide-react';
 
-type ExportFormat = 'csv' | 'excel' | 'json' | 'api_webhook';
+type ExportFormat = 'csv' | 'excel' | 'json';
 
 type ExportJob = {
   id: string;
@@ -78,8 +77,6 @@ export const ExportCenterView: React.FC = () => {
         return 'Excel Spreadsheet';
       case 'json':
         return 'JSON Payload';
-      case 'api_webhook':
-        return 'REST Webhook Event';
       default:
         return format.toUpperCase();
     }
@@ -153,22 +150,6 @@ export const ExportCenterView: React.FC = () => {
 
             <div className="text-[10px] text-slate-500">
               Export structured database records
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleExport('api_webhook')}
-            disabled={isExporting}
-            className="p-4 bg-slate-950 border border-slate-800 hover:border-blue-500 rounded-xl text-left transition group disabled:opacity-50"
-          >
-            <Server className="w-6 h-6 text-amber-400 mb-2 group-hover:scale-110 transition" />
-
-            <div className="font-bold text-slate-200 text-xs">
-              Trigger REST Webhook
-            </div>
-
-            <div className="text-[10px] text-slate-500">
-              Post verified records to downstream ERP
             </div>
           </button>
 

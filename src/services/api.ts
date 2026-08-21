@@ -42,6 +42,7 @@ export async function fetchDocumentById(documentId: string): Promise<{
   template?: any;
   extractedFields: ExtractedField[];
   humanCorrections: any[];
+  processingJob?: ProcessingJob | null;
 }> {
   const res = await fetch(`/api/documents/${documentId}`);
   const json = await res.json();
@@ -75,6 +76,12 @@ export async function fetchQueue(): Promise<ProcessingJob[]> {
     throw new Error(json.error || 'Failed to fetch job queue');
   }
   return json.data;
+}
+
+export async function retryProcessingJob(jobId: string): Promise<void> {
+  const res = await fetch(`/api/queue/${jobId}/retry`, { method: 'POST' });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Processing retry failed');
 }
 
 export async function fetchAuditLogs(): Promise<AuditLog[]> {

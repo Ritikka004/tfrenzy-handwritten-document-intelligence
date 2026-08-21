@@ -14,8 +14,9 @@ export interface User {
 }
 
 export type DocumentStatus = 'uploaded' | 'preprocessing' | 'ocr_in_progress' | 'verification_required' | 'verified' | 'rejected' | 'failed';
-export type ProcessingStage = 'quality_check' | 'preprocessing' | 'field_detection' | 'ocr' | 'validation' | 'verification' | 'completed';
+export type ProcessingStage = 'queued' | 'quality_check' | 'preprocessing' | 'field_detection' | 'ocr' | 'extraction' | 'validation' | 'verification' | 'completed';
 export type ConfidenceLevel = 'high' | 'medium' | 'low';
+export type FieldVerificationStatus = 'accepted' | 'review' | 'manual_correction';
 
 export interface DocumentType {
   id: string;
@@ -123,13 +124,22 @@ export interface Document {
   uploadedAt: string;
   verifiedBy?: string;
   verifiedAt?: string;
-  // -------- Visitor Details --------
+  imageUrl?: string;
+  // -------- Visitor Details (Canonical Schema) --------
+  visitor_name?: string;
   visitorName?: string;
+  mobile_number?: string;
   mobileNumber?: string;
+  visit_date?: string;
   visitDate?: string;
+  host_employee_id?: string;
   hostEmployeeId?: string;
-  vehicleRegistrationNumber?: string;
- passIssueQuality?: string;
+  vehicle_number?: string;
+  vehicleNumber?: string;
+  vehicleRegistrationNumber?: string; // backward-compat alias
+  passes_issued_quantity?: string;
+  passesIssuedQuantity?: string;
+  passIssueQuality?: string; // backward-compat alias
 }
 
 export interface DetectedRegion {
@@ -182,6 +192,9 @@ export interface ExtractedField {
   isValid: boolean;
   validationMessage?: string;
   isCorrected: boolean;
+  /** Backend-calculated state; the UI must render this rather than re-evaluating confidence. */
+  verificationStatus?: FieldVerificationStatus;
+  requiredConfidence?: number;
   regionBox: {
     x: number;
     y: number;
@@ -207,10 +220,15 @@ export interface ProcessingJob {
   id: string;
   documentId: string;
   jobType: 'ocr_ingestion' | 'reprocess' | 'export' | 'model_evaluation';
+  stage: ProcessingStage;
   status: 'queued' | 'processing' | 'completed' | 'failed';
   progressPercentage: number;
   startedAt?: string;
   completedAt?: string;
+  lastAttemptAt?: string;
+  failedAt?: string;
+  retryCount: number;
+  retryable: boolean;
   errorMessage?: string;
 }
 
@@ -257,6 +275,11 @@ export interface AuditLog {
   resource: string;
   details: string;
   timestamp: string;
+  documentId?: string;
+  fieldKey?: string;
+  originalOcrValue?: string;
+  correctedValue?: string;
+  notes?: string;
 }
 
 export interface DashboardMetrics {

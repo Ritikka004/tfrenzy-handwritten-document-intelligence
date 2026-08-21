@@ -517,7 +517,7 @@ export class TrOCRPythonService implements IOCRService {
   private readonly contentFocusedFields = new Set([
     'visitor_name',
     'vehicle_number',
-    'badge_quantity'
+    'passes_issued_quantity'
   ]);
 
   private async preprocessCropForHTR(croppedImageData: string): Promise<string> {

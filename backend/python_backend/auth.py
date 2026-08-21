@@ -7,7 +7,10 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 # Secret Configuration
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "tfrenzy_super_secret_jwt_key_2026_edge_ocr")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY must be configured before issuing or validating tokens.")
+SECRET_KEY = JWT_SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 Hours
 

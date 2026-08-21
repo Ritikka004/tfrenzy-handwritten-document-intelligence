@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { FileCode, Database, Layers, Server, Cpu, CheckCircle2, Copy, Terminal } from 'lucide-react';
+import { HIGH_CONFIDENCE_THRESHOLD, MEDIUM_CONFIDENCE_THRESHOLD } from '../constants/confidence.ts';
 
 export const SystemArchitectureView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'architecture' | 'database' | 'api' | 'jetson'>('architecture');
+
+  const highConfText = `>= ${HIGH_CONFIDENCE_THRESHOLD.toFixed(2)}`;
+  const medConfText = `${MEDIUM_CONFIDENCE_THRESHOLD.toFixed(2)} - ${(HIGH_CONFIDENCE_THRESHOLD - 0.01).toFixed(2)}`;
+  const lowConfText = `< ${MEDIUM_CONFIDENCE_THRESHOLD.toFixed(2)}`;
 
   return (
     <div className="space-y-6">
       <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-md">
         <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2">
           <FileCode className="w-6 h-6 text-blue-400" />
-          <span>Phase 1 Architecture, Database Schema & API Specifications</span>
+          <span>Phase 1 Architecture, Database Schema &amp; API Specifications</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">
           Complete engineering reference documentation covering OCR pipeline design, PostgreSQL 18-table relational DDL, OpenAPI endpoint definitions, and Jetson ONNX setup.
@@ -69,9 +74,9 @@ CONFIDENCE SCORING & RULE-BASED DATA TYPE VALIDATION
        │
        ▼
 HUMAN-IN-THE-LOOP VERIFICATION WORKSPACE
-  ├── High Confidence (>= 0.85): Auto Accept
-  ├── Medium Confidence (0.65 - 0.84): Highlight for Fast Review
-  └── Low Confidence (< 0.65) / Rule Fail: Mandatory Manual Correction
+  ├── High Confidence (${highConfText}): Auto Accept
+  ├── Medium Confidence (${medConfText}): Highlight for Fast Review
+  └── Low Confidence (${lowConfText}) / Rule Fail: Mandatory Manual Correction
        │
        ▼
 AUDIT-SAFE DATABASE PERSISTENCE (Original OCR Preserved, Correction Logged)

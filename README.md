@@ -21,7 +21,7 @@ High-performance, edge-capable document intelligence platform designed to ingest
               └─────────────────────┘       └────────────────────┘
                                  │             │
                           ┌──────▼─────────────▼──────┐
-                          │ PostgreSQL 15 / Fallback  │
+                          │ PostgreSQL 15              │
                           └───────────────────────────┘
 ```
 
@@ -32,7 +32,7 @@ High-performance, edge-capable document intelligence platform designed to ingest
 ### 1. Prerequisites
 - Node.js (v18+)
 - npm (v9+)
-- Docker & Docker Compose (optional for live PostgreSQL database)
+- Docker & Docker Compose (required for local PostgreSQL-backed operation)
 
 ### 2. Installation
 ```bash
@@ -51,6 +51,9 @@ npm run dev
 ```
 Access the application at `http://localhost:3000`.
 
+The development server requires `JWT_SECRET_KEY` in `.env`. Use a long random
+value and never commit a real secret.
+
 ### 5. Production Build & Execution
 ```bash
 npm run build
@@ -63,10 +66,10 @@ npm start
 
 1. **Document Upload**: Ingests images (`.png`, `.jpg`, `.jpeg`) or multi-page `.pdf` files up to **15 MB** stored securely under `backend/uploads/`.
 2. **OpenCV Quality Gate**: Evaluates Laplacian blur score, brightness histogram, DPI resolution, and rotation angle. Rejects degraded images.
-3. **Cascading OCR Engine**: Cascades from lightweight PP-v6 Mobile Edge to TrOCR Transformer on low-confidence regions.
+3. **Cascading OCR Engine**: Cascades from the configured lightweight OCR provider to TrOCR on low-confidence regions.
 4. **Field Validation Engine**: Evaluates regex rules (Mobile numbers, Dates, Vehicle registration IDs, Employee IDs) and computes confidence levels.
 5. **Human-in-the-loop Verification**: Verifiers review bounding regions, inspect validation badges, and submit corrections without overwriting original raw OCR output.
-6. **Persistence**: Saves records, corrections, job states, and audit trails to PostgreSQL with automatic development fallback.
+6. **Persistence**: Saves records, corrections, job states, exports, and audit trails to PostgreSQL. Production refuses to start without PostgreSQL.
 
 ---
 
@@ -83,7 +86,31 @@ docker compose up -d postgres
 - **User**: `tfrenzy_user`
 - **Password**: `securepassword`
 
-> **Note**: If PostgreSQL is offline or Docker is not running, the application catches the connection error cleanly and activates a persistent development fallback store so all APIs and offline mock features remain 100% operational.
+> **Note**: PostgreSQL is the persistence source of truth. Production startup fails closed when it cannot connect. Development may expose the existing in-memory demo fallback, but it must not be used for production data.
+
+## Authentication and API areas
+
+The application uses signed, expiring HMAC bearer sessions. Operational APIs require
+the authenticated token; role checks protect uploads, processing, verification,
+exports, templates, models, and datasets. Main API areas include `/api/auth`,
+`/api/documents`, `/api/queue`, `/api/verification`, `/api/export`,
+`/api/duplicates`, `/api/dashboard`, and `/api/audit-logs`.
+
+## Canonical fields and workflow behavior
+
+Active structured records use exactly six canonical fields:
+
+- `visitor_name`
+- `mobile_number`
+- `visit_date`
+- `host_employee_id`
+- `vehicle_number`
+- `passes_issued_quantity`
+
+Original OCR text is retained when a verifier submits a correction; the corrected
+final value and correction metadata are stored separately. Failed processing jobs
+include a failure reason and can be retried only when `retryable` is true. Completed
+jobs are not processed again.
 
 ---
 
@@ -101,4 +128,4 @@ docker compose up -d postgres
 ---
 
 ## 📌 Environment Constraints & Known Limitations
-- **PostgreSQL Live Persistence**: Live database persistence verification requires Docker or an active local PostgreSQL server listening on port `5432`.
+- **PostgreSQL Live Persistence**: PostgreSQL or Docker must be available on port `5432`; production will not silently fall back to memory.

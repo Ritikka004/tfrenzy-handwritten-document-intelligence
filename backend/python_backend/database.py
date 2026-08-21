@@ -3,8 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Database Connection URL (defaults to PostgreSQL, fallback to SQLite for local development)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./tfrenzy_doc_db.sqlite3")
+# Production and connected-mode deployments require PostgreSQL explicitly.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL must be configured; PostgreSQL is required in production mode.")
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 

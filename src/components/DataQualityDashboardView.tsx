@@ -16,12 +16,12 @@ const MOCK_DATA_QUALITY: DashboardMetrics = {
   duplicateCount:                7,
   rejectedImagesCount:           19,
   fieldAccuracyMap: {
-    visitor_name:         94.2,
-    mobile_number:        97.8,
-    visit_date:           99.1,
-    host_employee_id:     96.5,
-    vehicle_registration: 88.3,
-    pass_issue_quality:   99.6,
+    visitor_name:           94.2,
+    mobile_number:          97.8,
+    visit_date:             99.1,
+    host_employee_id:       96.5,
+    vehicle_number:         88.3,
+    passes_issued_quantity: 99.6,
   },
   accuracyByDocumentType: {
     'Visitor Entry Register':    94.5,
@@ -67,7 +67,7 @@ const MOCK_DUPLICATE_MATCHES = [
     matchedDocumentId: 'doc-mock-003',
     matchedDocumentName: 'visitor_reg_20260806_001.jpg',
     similarityScore: 0.81,
-    matchReason: 'Perceptual Hash Match (mobile_number, vehicle_registration)',
+    matchReason: 'Perceptual Hash Match (mobile_number, vehicle_number)',
     detectedAt: '2026-08-06T14:22:00Z',
   },
 ];
@@ -164,7 +164,7 @@ export const DataQualityDashboardView: React.FC<DataQualityDashboardViewProps> =
             <Award className="w-5 h-5 text-emerald-400" />
           </div>
           <div className="text-3xl font-black text-emerald-400">{displayMetrics.avgConfidence}%</div>
-          <p className="text-[11px] text-slate-400 mt-1">Cascading PaddleOCR + TrOCR average</p>
+          <p className="text-[11px] text-slate-400 mt-1">Cascading TrOCR + Tesseract.js average</p>
           <div className="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
             <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${displayMetrics.avgConfidence}%` }}></div>
           </div>

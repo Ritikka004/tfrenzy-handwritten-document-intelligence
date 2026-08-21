@@ -99,10 +99,15 @@ CREATE TABLE processing_jobs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     job_type VARCHAR(50) NOT NULL,
+    stage VARCHAR(50) NOT NULL DEFAULT 'queued',
     status VARCHAR(50) NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'processing', 'completed', 'failed')),
     progress_percentage INT DEFAULT 0,
     started_at TIMESTAMP WITH TIME ZONE,
     completed_at TIMESTAMP WITH TIME ZONE,
+    last_attempt_at TIMESTAMP WITH TIME ZONE,
+    failed_at TIMESTAMP WITH TIME ZONE,
+    retry_count INT NOT NULL DEFAULT 0,
+    retryable BOOLEAN NOT NULL DEFAULT TRUE,
     error_message TEXT
 );
 

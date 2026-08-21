@@ -28,8 +28,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9876543210',
     visitDate: '2026-08-05',
     hostEmployeeId: 'EMP-1042',
-    vehicleRegistrationNumber: 'MH12AB1234',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'MH12AB1234',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-002',
@@ -53,8 +53,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9845012345',
     visitDate: '2026-08-05',
     hostEmployeeId: 'EMP-0871',
-    vehicleRegistrationNumber: 'KA05MN7890',
-    passIssueQuality: 'Average',
+    vehicleNumber: 'KA05MN7890',
+    passesIssuedQuantity: '2',
   },
   {
     id: 'doc-mock-003',
@@ -80,8 +80,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9712345678',
     visitDate: '2026-08-06',
     hostEmployeeId: 'EMP-2301',
-    vehicleRegistrationNumber: 'GJ01BX4422',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'GJ01BX4422',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-004',
@@ -105,8 +105,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '8899001122',
     visitDate: '2026-08-06',
     hostEmployeeId: 'EMP-0540',
-    vehicleRegistrationNumber: '',
-    passIssueQuality: 'Poor',
+    vehicleNumber: '',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-005',
@@ -132,8 +132,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9500112233',
     visitDate: '2026-08-06',
     hostEmployeeId: 'EMP-1197',
-    vehicleRegistrationNumber: 'TN09CD5566',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'TN09CD5566',
+    passesIssuedQuantity: '3',
   },
   {
     id: 'doc-mock-006',
@@ -157,8 +157,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9611223344',
     visitDate: '2026-08-07',
     hostEmployeeId: 'EMP-0334',
-    vehicleRegistrationNumber: 'AP10EF3311',
-    passIssueQuality: 'Average',
+    vehicleNumber: 'AP10EF3311',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-007',
@@ -182,8 +182,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9302233445',
     visitDate: '2026-08-07',
     hostEmployeeId: 'EMP-1785',
-    vehicleRegistrationNumber: 'RJ14GH9922',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'RJ14GH9922',
+    passesIssuedQuantity: '2',
   },
   {
     id: 'doc-mock-008',
@@ -209,8 +209,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9421001234',
     visitDate: '2026-08-07',
     hostEmployeeId: 'EMP-2014',
-    vehicleRegistrationNumber: 'MH43PQ6677',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'MH43PQ6677',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-009',
@@ -235,8 +235,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9788334455',
     visitDate: '2026-08-07',
     hostEmployeeId: 'EMP-0992',
-    vehicleRegistrationNumber: 'DL04RT2233',
-    passIssueQuality: 'Average',
+    vehicleNumber: 'DL04RT2233',
+    passesIssuedQuantity: '2',
   },
   {
     id: 'doc-mock-010',
@@ -262,8 +262,8 @@ const MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9654778899',
     visitDate: '2026-08-07',
     hostEmployeeId: 'EMP-1567',
-    vehicleRegistrationNumber: 'UP32YZ1100',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'UP32YZ1100',
+    passesIssuedQuantity: '1',
   },
 ];
 
@@ -303,22 +303,24 @@ export const DocumentSearchView: React.FC<DocumentSearchViewProps> = ({ document
       !searchTerm ||
       doc.fileName.toLowerCase().includes(s) ||
       doc.id.toLowerCase().includes(s) ||
-      (doc.visitorName              || '').toLowerCase().includes(s) ||
-      (doc.mobileNumber             || '').includes(searchTerm) ||
-      (doc.hostEmployeeId           || '').toLowerCase().includes(s) ||
-      (doc.vehicleRegistrationNumber || '').toLowerCase().includes(s);
+      (doc.visitor_name             || doc.visitorName              || '').toLowerCase().includes(s) ||
+      (doc.mobile_number            || doc.mobileNumber             || '').includes(searchTerm) ||
+      (doc.visit_date               || doc.visitDate                || '').toLowerCase().includes(s) ||
+      (doc.host_employee_id         || doc.hostEmployeeId           || '').toLowerCase().includes(s) ||
+      (doc.vehicle_number           || doc.vehicleNumber            || '').toLowerCase().includes(s) ||
+      (doc.passes_issued_quantity   || doc.passesIssuedQuantity     || '').toLowerCase().includes(s);
 
     const matchesMobile =
       !mobileFilter ||
-      (doc.mobileNumber || '').includes(mobileFilter);
+      (doc.mobile_number || doc.mobileNumber || '').includes(mobileFilter);
 
     const matchesEmployee =
       !employeeFilter ||
-      (doc.hostEmployeeId || '').toLowerCase().includes(employeeFilter.toLowerCase());
+      (doc.host_employee_id || doc.hostEmployeeId || '').toLowerCase().includes(employeeFilter.toLowerCase());
 
     const matchesVehicle =
       !vehicleFilter ||
-      (doc.vehicleRegistrationNumber || '').toLowerCase().includes(vehicleFilter.toLowerCase());
+      (doc.vehicle_number || doc.vehicleNumber || '').toLowerCase().includes(vehicleFilter.toLowerCase());
 
     const matchesStatus =
       selectedStatus === 'all' || doc.status === selectedStatus;
@@ -380,7 +382,7 @@ export const DocumentSearchView: React.FC<DocumentSearchViewProps> = ({ document
     <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
     <input
       type="text"
-      placeholder="Search by Visitor Name, File Name, Mobile, Employee ID, Vehicle No, Doc ID…"
+      placeholder="Search by Visitor Full Name, File Name, Mobile Number, Host Employee ID, Vehicle Registration Number, Passes Issued Quantity, Doc ID…"
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
       className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:border-blue-500"
@@ -452,90 +454,80 @@ export const DocumentSearchView: React.FC<DocumentSearchViewProps> = ({ document
 
       {/* Document Results Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow">
-        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+        <div className="px-5 py-3.5 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
           <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Indexed Document Records</span>
-          <span className="text-xs text-slate-500">{filtered.length} Records Found</span>
+          <span className="text-xs text-slate-400 font-medium">{filtered.length} Records Found</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
-                <th className="p-3.5">Visitor Name</th>
-                <th className="p-3.5">Mobile Number</th>
-                <th className="p-3.5">Visit Date</th>
-                <th className="p-3.5">Host Employee ID</th>
-                <th className="p-3.5">Vehicle Number</th>
-                <th className="p-3.5">Pass Issue Quality</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5 text-right">Actions</th>
+                <th className="py-3 px-4 whitespace-nowrap">Visitor Full Name</th>
+                <th className="py-3 px-4 whitespace-nowrap">Mobile Number</th>
+                <th className="py-3 px-4 whitespace-nowrap">Date of Visit</th>
+                <th className="py-3 px-4 whitespace-nowrap">Host Employee ID</th>
+                <th className="py-3 px-4 whitespace-nowrap">Vehicle Number</th>
+                <th className="py-3 px-4 whitespace-nowrap text-center">Passes</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
-  {filtered.length === 0 ? (
-    <tr>
-      <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
-        No records match the current filters.
-      </td>
-    </tr>
-  ) : (
-    filtered.map((doc) => (
-      <tr key={doc.id} className="hover:bg-slate-800/50 transition">
+            <tbody className="divide-y divide-slate-800/80 text-slate-300">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
+                    No records match the current filters.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-slate-200 whitespace-nowrap">
+                      {doc.visitor_name || doc.visitorName || '—'}
+                    </td>
 
-        <td className="p-3.5 font-semibold text-slate-200">
-          {doc.visitorName || '—'}
-        </td>
+                    <td className="py-3 px-4 font-mono text-slate-300 whitespace-nowrap">
+                      {doc.mobile_number || doc.mobileNumber || '—'}
+                    </td>
 
-        <td className="p-3.5 font-mono">
-          {doc.mobileNumber || '—'}
-        </td>
+                    <td className="py-3 px-4 text-slate-300 whitespace-nowrap">
+                      {doc.visit_date || doc.visitDate || '—'}
+                    </td>
 
-        <td className="p-3.5">
-          {doc.visitDate || '—'}
-        </td>
+                    <td className="py-3 px-4 font-mono text-indigo-300 whitespace-nowrap">
+                      {doc.host_employee_id || doc.hostEmployeeId || '—'}
+                    </td>
 
-        <td className="p-3.5 font-mono text-indigo-300">
-          {doc.hostEmployeeId || '—'}
-        </td>
+                    <td className="py-3 px-4 font-mono text-slate-300 whitespace-nowrap">
+                      {doc.vehicle_number || doc.vehicleNumber || '—'}
+                    </td>
 
-        <td className="p-3.5 font-mono">
-          {doc.vehicleRegistrationNumber || '—'}
-        </td>
+                    <td className="py-3 px-4 text-center font-semibold text-slate-200 whitespace-nowrap">
+                      {doc.passes_issued_quantity || doc.passesIssuedQuantity || '—'}
+                    </td>
 
-        <td className="p-3.5">
-          <span
-            className={`px-2 py-1 rounded text-[10px] font-bold ${
-              doc.imageQuality.isAcceptable
-                ? 'bg-green-600/20 text-green-400'
-                : 'bg-red-600/20 text-red-400'
-            }`}
-          >
-            {doc.imageQuality.isAcceptable ? 'Passed' : 'Failed'}
-          </span>
-        </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold tracking-wide uppercase ${
+                        STATUS_STYLES[doc.status] ?? 'bg-slate-500/20 text-slate-400'
+                      }`}>
+                        {doc.status.replace(/_/g, ' ')}
+                      </span>
+                    </td>
 
-        {/* ── Status column (was missing — now restored) ── */}
-        <td className="p-3.5">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-            STATUS_STYLES[doc.status] ?? 'bg-slate-500/20 text-slate-400'
-          }`}>
-            {doc.status.replace(/_/g, ' ')}
-          </span>
-        </td>
-
-        <td className="p-3.5 text-right">
-          <button
-            onClick={() => setActiveDoc(doc)}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white text-[11px] font-semibold transition"
-          >
-            View
-          </button>
-        </td>
-
-      </tr>
-    ))
-  )}
-</tbody>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <button
+                        onClick={() => setActiveDoc(doc)}
+                        className="px-3.5 py-1.5 bg-blue-600/90 hover:bg-blue-500 rounded-lg text-white text-xs font-semibold transition-colors shadow-sm cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
       </div>
@@ -589,28 +581,28 @@ export const DocumentSearchView: React.FC<DocumentSearchViewProps> = ({ document
               {/* Visitor fields */}
               <div className="grid grid-cols-2 gap-3 bg-slate-950 p-3 rounded-lg">
                 <div>
-                  <span className="text-slate-500">Visitor Name:</span>
-                  <p className="font-semibold text-slate-200">{activeDoc.visitorName || '—'}</p>
+                  <span className="text-slate-500">Visitor Full Name:</span>
+                  <p className="font-semibold text-slate-200">{activeDoc.visitor_name || activeDoc.visitorName || '—'}</p>
                 </div>
                 <div>
                   <span className="text-slate-500">Mobile Number:</span>
-                  <p className="font-semibold font-mono text-slate-200">{activeDoc.mobileNumber || '—'}</p>
+                  <p className="font-semibold font-mono text-slate-200">{activeDoc.mobile_number || activeDoc.mobileNumber || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-500">Visit Date:</span>
-                  <p className="font-semibold text-slate-200">{activeDoc.visitDate || '—'}</p>
+                  <span className="text-slate-500">Date of Visit:</span>
+                  <p className="font-semibold text-slate-200">{activeDoc.visit_date || activeDoc.visitDate || '—'}</p>
                 </div>
                 <div>
                   <span className="text-slate-500">Host Employee ID:</span>
-                  <p className="font-semibold font-mono text-indigo-300">{activeDoc.hostEmployeeId || '—'}</p>
+                  <p className="font-semibold font-mono text-indigo-300">{activeDoc.host_employee_id || activeDoc.hostEmployeeId || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-500">Vehicle Registration:</span>
-                  <p className="font-semibold font-mono text-slate-200">{activeDoc.vehicleRegistrationNumber || '—'}</p>
+                  <span className="text-slate-500">Vehicle Registration Number:</span>
+                  <p className="font-semibold font-mono text-slate-200">{activeDoc.vehicle_number || activeDoc.vehicleNumber || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-500">Pass Issue Quality:</span>
-                  <p className="font-semibold text-slate-200">{activeDoc.passIssueQuality || '—'}</p>
+                  <span className="text-slate-500">Passes Issued Quantity:</span>
+                  <p className="font-semibold text-slate-200">{activeDoc.passes_issued_quantity || activeDoc.passesIssuedQuantity || '—'}</p>
                 </div>
               </div>
 

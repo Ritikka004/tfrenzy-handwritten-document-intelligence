@@ -17,7 +17,7 @@ const MOCK_AUDIT_LOGS: AuditLog[] = [
     userId:    'usr-001',
     action:    'OCR_COMPLETED',
     resource:  'doc-mock-010',
-    details:   'PaddleOCR PP-v6 completed in 2.9 s — overall confidence: 91.0%',
+    details:   'Tesseract.js OCR completed in 2.9 s — overall confidence: 91.0%',
     timestamp: '2026-08-07T12:51:10Z',
   },
   {
@@ -31,9 +31,9 @@ const MOCK_AUDIT_LOGS: AuditLog[] = [
   {
     id:        'log-mock-004',
     userId:    'usr-002',
-    action:    'DOCUMENT_APPROVED',
+    action:    'DOCUMENT_VERIFIED',
     resource:  'doc-mock-010',
-    details:   'Document status set to VERIFIED — pass quality: Good',
+    details:   'Document status set to VERIFIED — passes issued: 1',
     timestamp: '2026-08-07T13:22:05Z',
   },
   {
@@ -49,7 +49,7 @@ const MOCK_AUDIT_LOGS: AuditLog[] = [
     userId:    'usr-002',
     action:    'FIELD_CORRECTED',
     resource:  'doc-mock-009',
-    details:   'mobile_number corrected: "9788334455" → "9788334456"; vehicle_registration corrected: "DL04RT2233" → "DL04RJ2233"',
+    details:   'mobile_number corrected: "9788334455" → "9788334456"; vehicle_number corrected: "DL04RT2233" → "DL04RJ2233"',
     timestamp: '2026-08-07T11:58:30Z',
   },
   {

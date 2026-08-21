@@ -245,7 +245,7 @@ export const ModelPerformanceView: React.FC<ModelPerformanceViewProps> = ({ mode
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
           <span className="text-slate-400 text-xs font-semibold uppercase">Inference Latency</span>
           <div className="text-2xl font-black text-emerald-400 mt-1">120 ms</div>
-          <p className="text-[10px] text-slate-500">PaddleOCR PP-v6 Edge Tier</p>
+          <p className="text-[10px] text-slate-500">Tesseract.js (Edge Tier)</p>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
@@ -432,7 +432,7 @@ export const ModelPerformanceView: React.FC<ModelPerformanceViewProps> = ({ mode
                 <span>ONNX Opset 17 Model Exporter</span>
               </h2>
               <p className="text-xs text-slate-400 mt-1">
-                Export PaddleOCR DBNet and CRNN computational graphs into ONNX format for Jetson TensorRT engine building.
+                Export PaddleOCR PP-v6 DBNet and CRNN computational graphs into ONNX format for Jetson TensorRT engine building. PaddleOCR PP-v6 is the planned production edge model; Tesseract.js is the current runtime fallback.
               </p>
             </div>
 
@@ -442,7 +442,7 @@ export const ModelPerformanceView: React.FC<ModelPerformanceViewProps> = ({ mode
               startIcon={<Download className="w-4 h-4" />}
               className="bg-emerald-600 hover:bg-emerald-700 normal-case text-xs"
             >
-              Export Primary PaddleOCR to ONNX
+              Export PaddleOCR PP-v6 to ONNX
             </Button>
           </div>
 

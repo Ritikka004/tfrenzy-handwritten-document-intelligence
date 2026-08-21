@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider } from './context/AuthContext.tsx';
+import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { Navbar } from './components/Navbar.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
 import { DashboardView } from './components/DashboardView.tsx';
@@ -16,6 +16,7 @@ import { SettingsView } from './components/SettingsView.tsx';
 import { SystemArchitectureView } from './components/SystemArchitectureView.tsx';
 import { ImagePreprocessingView } from './components/ImagePreprocessingView.tsx';
 import { LoginView } from './components/LoginView.tsx';
+import { retryProcessingJob } from './services/api.ts';
 
 import {
   Document, DocumentType, DocumentTemplate, DashboardMetrics,
@@ -24,21 +25,21 @@ import {
 
 // ─── Global Mock Data Fallbacks for Offline Operations ────────────────────────
 const INITIAL_MOCK_METRICS: DashboardMetrics = {
-  documentsProcessed:            1247,
-  documentsAwaitingVerification: 23,
-  straightThroughProcessingRate: 78.4,
+  documentsProcessed:            3,
+  documentsAwaitingVerification: 1,
+  straightThroughProcessingRate: 66.7,
   avgProcessingTimeSec:          3.2,
   avgConfidence:                 91.7,
-  totalHumanCorrections:         184,
-  duplicateCount:                7,
-  rejectedImagesCount:           19,
+  totalHumanCorrections:         2,
+  duplicateCount:                0,
+  rejectedImagesCount:           0,
   fieldAccuracyMap: {
-    visitor_name:         94.2,
-    mobile_number:        97.8,
-    visit_date:           99.1,
-    host_employee_id:     96.5,
-    vehicle_registration: 88.3,
-    pass_issue_quality:   99.6,
+    visitor_name:           94.2,
+    mobile_number:          97.8,
+    visit_date:             99.1,
+    host_employee_id:       96.5,
+    vehicle_number:         88.3,
+    passes_issued_quantity: 99.6,
   },
   accuracyByDocumentType: {
     'Visitor Entry Register':    94.5,
@@ -80,8 +81,8 @@ const INITIAL_MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9876543210',
     visitDate: '2026-08-05',
     hostEmployeeId: 'EMP-1042',
-    vehicleRegistrationNumber: 'MH12AB1234',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'MH12AB1234',
+    passesIssuedQuantity: '1',
   },
   {
     id: 'doc-mock-002',
@@ -105,8 +106,8 @@ const INITIAL_MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9845012345',
     visitDate: '2026-08-05',
     hostEmployeeId: 'EMP-0871',
-    vehicleRegistrationNumber: 'KA05MN7890',
-    passIssueQuality: 'Average',
+    vehicleNumber: 'KA05MN7890',
+    passesIssuedQuantity: '2',
   },
   {
     id: 'doc-mock-003',
@@ -132,8 +133,8 @@ const INITIAL_MOCK_DOCUMENTS: Document[] = [
     mobileNumber: '9712345678',
     visitDate: '2026-08-06',
     hostEmployeeId: 'EMP-2301',
-    vehicleRegistrationNumber: 'GJ01BX4422',
-    passIssueQuality: 'Good',
+    vehicleNumber: 'GJ01BX4422',
+    passesIssuedQuantity: '1',
   },
 ];
 
@@ -156,12 +157,12 @@ const INITIAL_MOCK_TEMPLATES: DocumentTemplate[] = [
         id:             'fld-001',
         templateId:     'tpl-mock-001',
         fieldKey:       'visitor_name',
-        label:          'Visitor Name',
+        label:          'Visitor Full Name',
         fieldType:      'name',
         isRequired:     true,
-        validationRegex: '^[A-Za-z .]{2,80}$',
+        validationRegex: '^[A-Za-z\\s\\.\'-]{2,50}$',
         minConfidence:  0.85,
-        boundingBox:    { x: 10, y: 12, width: 40, height: 8 },
+        boundingBox:    { x: 7.60, y: 19.34, width: 39.36, height: 7.83 },
       },
       {
         id:             'fld-002',
@@ -171,19 +172,19 @@ const INITIAL_MOCK_TEMPLATES: DocumentTemplate[] = [
         fieldType:      'phone',
         isRequired:     true,
         validationRegex: '^[6-9]\\d{9}$',
-        minConfidence:  0.90,
-        boundingBox:    { x: 10, y: 22, width: 30, height: 8 },
+        minConfidence:  0.85,
+        boundingBox:    { x: 53.87, y: 19.34, width: 39.36, height: 7.83 },
       },
       {
         id:             'fld-003',
         templateId:     'tpl-mock-001',
         fieldKey:       'visit_date',
-        label:          'Visit Date',
+        label:          'Date of Visit',
         fieldType:      'date',
         isRequired:     true,
-        validationRegex: '^\\d{4}-\\d{2}-\\d{2}$',
-        minConfidence:  0.95,
-        boundingBox:    { x: 55, y: 12, width: 35, height: 8 },
+        validationRegex: '^(\\d{4}-\\d{2}-\\d{2}|\\d{2}\\/\\d{2}\\/\\d{4})$',
+        minConfidence:  0.85,
+        boundingBox:    { x: 7.60, y: 32.69, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-004',
@@ -192,30 +193,31 @@ const INITIAL_MOCK_TEMPLATES: DocumentTemplate[] = [
         label:          'Host Employee ID',
         fieldType:      'employee_id',
         isRequired:     true,
-        validationRegex: '^EMP-\\d{4}$',
-        minConfidence:  0.90,
-        boundingBox:    { x: 10, y: 32, width: 30, height: 8 },
+        validationRegex: '^EMP[ -]?[0-9\\-]{3,10}$',
+        minConfidence:  0.80,
+        boundingBox:    { x: 53.87, y: 32.69, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-005',
         templateId:     'tpl-mock-001',
-        fieldKey:       'vehicle_registration',
+        fieldKey:       'vehicle_number',
         label:          'Vehicle Registration Number',
         fieldType:      'vehicle_number',
         isRequired:     false,
-        validationRegex: '^[A-Z]{2}\\d{2}[A-Z]{1,2}\\d{4}$',
+        validationRegex: '^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$',
         minConfidence:  0.80,
-        boundingBox:    { x: 10, y: 42, width: 35, height: 8 },
+        boundingBox:    { x: 7.60, y: 46.04, width: 39.36, height: 7.37 },
       },
       {
         id:             'fld-006',
         templateId:     'tpl-mock-001',
-        fieldKey:       'pass_issue_quality',
-        label:          'Pass Issue Quality',
-        fieldType:      'checklist',
+        fieldKey:       'passes_issued_quantity',
+        label:          'Passes Issued Quantity',
+        fieldType:      'quantity',
         isRequired:     true,
+        validationRegex: '^(?!0+$)\\d{1,4}$',
         minConfidence:  0.85,
-        boundingBox:    { x: 55, y: 22, width: 35, height: 8 },
+        boundingBox:    { x: 53.87, y: 46.04, width: 39.36, height: 7.37 },
       },
     ],
   },
@@ -227,8 +229,11 @@ const INITIAL_MOCK_QUEUE_JOBS = [
     documentId: 'doc-mock-002',
     fileName: 'visitor_reg_20260805_002.jpg',
     jobType: 'ocr_ingestion',
+    stage: 'ocr',
     status: 'processing',
     progressPercentage: 65,
+    retryCount: 0,
+    retryable: false,
     startedAt: '2026-08-05T09:15:33Z',
   },
   {
@@ -236,19 +241,25 @@ const INITIAL_MOCK_QUEUE_JOBS = [
     documentId: 'doc-mock-006',
     fileName: 'visitor_reg_20260807_001.jpg',
     jobType: 'ocr_ingestion',
+    stage: 'queued',
     status: 'queued',
     progressPercentage: 0,
+    retryCount: 0,
+    retryable: true,
     startedAt: '2026-08-07T08:05:19Z',
   },
 ];
 
 function AppContent() {
+  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(INITIAL_MOCK_METRICS);
-  const [documents, setDocuments] = useState<Document[]>(INITIAL_MOCK_DOCUMENTS);
-  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>(INITIAL_MOCK_DOCUMENT_TYPES);
-  const [templates, setTemplates] = useState<DocumentTemplate[]>(INITIAL_MOCK_TEMPLATES);
-  const [queueJobs, setQueueJobs] = useState<any[]>(INITIAL_MOCK_QUEUE_JOBS);
+  // Operational views start empty and are populated only from the authenticated API.
+  // Demo arrays above are retained solely as development fixtures, never rendered.
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+  const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
+  const [queueJobs, setQueueJobs] = useState<any[]>([]);
   const [models, setModels] = useState<ModelVersion[]>([]);
   const [datasets, setDatasets] = useState<DatasetVersion[]>([]);
   // Track the ID of the most recently uploaded document so VerificationView auto-selects it
@@ -268,19 +279,19 @@ function AppContent() {
       if (mRes.status === 'fulfilled' && mRes.value?.success && mRes.value?.data) {
         setMetrics(mRes.value.data);
       }
-      if (dRes.status === 'fulfilled' && dRes.value?.success && Array.isArray(dRes.value?.data) && dRes.value.data.length > 0) {
+      if (dRes.status === 'fulfilled' && dRes.value?.success && Array.isArray(dRes.value?.data)) {
         setDocuments(dRes.value.data);
       }
-      if (tRes.status === 'fulfilled' && tRes.value?.success && Array.isArray(tRes.value?.data) && tRes.value.data.length > 0) {
+      if (tRes.status === 'fulfilled' && tRes.value?.success && Array.isArray(tRes.value?.data)) {
         setTemplates(tRes.value.data);
       }
-      if (qRes.status === 'fulfilled' && qRes.value?.success && Array.isArray(qRes.value?.data) && qRes.value.data.length > 0) {
+      if (qRes.status === 'fulfilled' && qRes.value?.success && Array.isArray(qRes.value?.data)) {
         setQueueJobs(qRes.value.data);
       }
-      if (modRes.status === 'fulfilled' && modRes.value?.success && Array.isArray(modRes.value?.data) && modRes.value.data.length > 0) {
+      if (modRes.status === 'fulfilled' && modRes.value?.success && Array.isArray(modRes.value?.data)) {
         setModels(modRes.value.data);
       }
-      if (dsRes.status === 'fulfilled' && dsRes.value?.success && Array.isArray(dsRes.value?.data) && dsRes.value.data.length > 0) {
+      if (dsRes.status === 'fulfilled' && dsRes.value?.success && Array.isArray(dsRes.value?.data)) {
         setDatasets(dsRes.value.data);
       }
     } catch (err) {
@@ -289,10 +300,51 @@ function AppContent() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isAuthenticated) loadData();
+  }, [isAuthenticated]);
+
+  // ── Full-screen login gate ───────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <LoginView onSuccess={() => { loadData(); setActiveTab('dashboard'); }} />
+    );
+  }
 
   const pendingCount = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded').length;
+
+  const derivedMetrics: DashboardMetrics = React.useMemo(() => {
+    const awaitingDocs = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded');
+    const awaitingCount = awaitingDocs.length;
+    const processedDocs = documents.filter(d => d.status !== 'ocr_in_progress');
+    const processedCount = processedDocs.length;
+    const straightThroughCount = Math.max(0, processedCount - awaitingCount);
+    const straightThroughRate = processedCount > 0
+      ? Number(((straightThroughCount / processedCount) * 100).toFixed(1))
+      : 0;
+
+    const validConfDocs = documents.filter(d => typeof d.overallConfidence === 'number' && d.overallConfidence > 0);
+    const dynamicAvgConfidence = validConfDocs.length > 0
+      ? Number(((validConfDocs.reduce((acc, d) => acc + d.overallConfidence, 0) / validConfDocs.length) * 100).toFixed(1))
+      : (metrics?.avgConfidence ?? 0);
+
+    const duplicateCount = documents.filter(d => d.isDuplicate).length;
+    const rejectedImagesCount = documents.filter(d => d.status === 'rejected' || (d.imageQuality && !d.imageQuality.isAcceptable)).length;
+
+    const baseMetrics = metrics || {
+      documentsProcessed: 0, documentsAwaitingVerification: 0, straightThroughProcessingRate: 0,
+      avgProcessingTimeSec: 0, avgConfidence: 0, totalHumanCorrections: 0, duplicateCount: 0,
+      rejectedImagesCount: 0, fieldAccuracyMap: {}, accuracyByDocumentType: {}, mostMisreadCharacters: []
+    };
+    return {
+      ...baseMetrics,
+      documentsProcessed: processedCount,
+      documentsAwaitingVerification: awaitingCount,
+      straightThroughProcessingRate: Math.min(100, Math.max(0, straightThroughRate)),
+      avgConfidence: dynamicAvgConfidence,
+      duplicateCount,
+      rejectedImagesCount,
+    };
+  }, [documents, metrics]);
 
   const handleSaveCorrection = async (
     documentId: string,
@@ -305,17 +357,18 @@ function AppContent() {
         body: JSON.stringify({ documentId, corrections, userId: 'usr-002' })
       });
       const json = await res.json();
-      if (json.success) {
-        await loadData();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Verification save failed. No local changes were applied.');
       }
-    } catch {
-      // Offline fallback: update document status locally
-      setDocuments(prev => prev.map(doc =>
-        doc.id === documentId
-          ? { ...doc, status: 'verified', currentStage: 'completed' }
-          : doc
-      ));
+      await loadData();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Verification save failed. No local changes were applied.');
     }
+  };
+
+  const handleRetryProcessing = async (jobId: string) => {
+    await retryProcessingJob(jobId);
+    await loadData();
   };
 
   const handleSaveTemplate = async (template: Partial<DocumentTemplate>) => {
@@ -338,7 +391,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
+    <div className="h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden font-sans antialiased selection:bg-blue-600 selection:text-white">
       {/* Top Header */}
       <Navbar
         activeTab={activeTab}
@@ -355,14 +408,10 @@ function AppContent() {
         />
 
         {/* Main Content Workspace */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-          {activeTab === 'login' && (
-            <LoginView onSuccess={() => { loadData(); setActiveTab('dashboard'); }} />
-          )}
-
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto flex flex-col">
           {activeTab === 'dashboard' && (
             <DashboardView
-              metrics={metrics}
+              metrics={derivedMetrics}
               onNavigateToVerification={() => setActiveTab('verification')}
               onNavigateToUpload={() => setActiveTab('upload')}
             />
@@ -370,7 +419,7 @@ function AppContent() {
 
           {activeTab === 'data-quality' && (
             <DataQualityDashboardView
-              metrics={metrics}
+              metrics={derivedMetrics}
               documents={documents}
               onNavigateToVerification={() => setActiveTab('verification')}
             />
@@ -396,7 +445,7 @@ function AppContent() {
           )}
 
           {activeTab === 'queue' && (
-            <QueueView jobs={queueJobs} />
+            <QueueView jobs={queueJobs} onRetry={handleRetryProcessing} />
           )}
 
           {activeTab === 'verification' && (
