@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 import { Navbar } from './components/Navbar.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
@@ -303,16 +303,7 @@ function AppContent() {
     if (isAuthenticated) loadData();
   }, [isAuthenticated]);
 
-  // ── Full-screen login gate ───────────────────────────────────────────────────
-  if (!isAuthenticated) {
-    return (
-      <LoginView onSuccess={() => { loadData(); setActiveTab('dashboard'); }} />
-    );
-  }
-
-  const pendingCount = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded').length;
-
-  const derivedMetrics: DashboardMetrics = React.useMemo(() => {
+  const derivedMetrics: DashboardMetrics = useMemo(() => {
     const awaitingDocs = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded');
     const awaitingCount = awaitingDocs.length;
     const processedDocs = documents.filter(d => d.status !== 'ocr_in_progress');
@@ -345,6 +336,15 @@ function AppContent() {
       rejectedImagesCount,
     };
   }, [documents, metrics]);
+
+  // ── Full-screen login gate ───────────────────────────────────────────────────
+  if (!isAuthenticated) {
+    return (
+      <LoginView onSuccess={() => { loadData(); setActiveTab('dashboard'); }} />
+    );
+  }
+
+  const pendingCount = documents.filter(d => d.status === 'verification_required' || d.status === 'uploaded').length;
 
   const handleSaveCorrection = async (
     documentId: string,
