@@ -2,8 +2,8 @@ services:
   - type: web
     name: tfrenzy-document-intelligence-platform
     runtime: node
-    repo: https://github.com/HariKrishnahk1/TFrenzy.git
-    branch: main
+    repo: https://github.com/Ritikka004/tfrenzy-handwritten-document-intelligence.git
+    branch: development
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
@@ -14,3 +14,4 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
+    healthCheckPath: /api/health

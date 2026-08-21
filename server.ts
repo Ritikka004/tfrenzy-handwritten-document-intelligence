@@ -18,7 +18,7 @@ import { ExtractedField, Document, DocumentStatus, ProcessingJob, ProcessingStag
 import { HIGH_CONFIDENCE_THRESHOLD, getConfidenceLevel, getFieldVerificationStatus } from './backend/constants/confidence.ts';
 
 const app = express();
-const PORT = Number(process.env.PORT || 3000);
+const port = Number(process.env.PORT) || 3000;
 
 // Configure disk storage for real document uploads
 const uploadDir = path.join(process.cwd(), 'backend', 'uploads');
@@ -55,7 +55,20 @@ const upload = multer({
   fileFilter
 });
 
-app.use(cors());
+const corsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+const corsOptions = corsOrigins.length > 0
+  ? {
+      origin: (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
+        callback(null, !origin || corsOrigins.includes(origin));
+      }
+    }
+  : process.env.NODE_ENV === 'production'
+    ? { origin: false }
+    : undefined;
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 // The original upload, never a generated placeholder, is the preview source.
@@ -2207,8 +2220,8 @@ async function startServer() {
     });
   }
 
-  const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`TFrenzy Document Intelligence Server running at http://0.0.0.0:${PORT}`);
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`TFrenzy Document Intelligence Server running at http://0.0.0.0:${port}`);
   });
 
   const gracefulShutdown = (signal: string) => {

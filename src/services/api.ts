@@ -5,8 +5,13 @@
 
 import { Document, DocumentType, ExtractedField, ProcessingJob, AuditLog, DashboardMetrics } from '../types/index.ts';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
+export const apiUrl = (path: string) =>
+  `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
 export async function uploadDocument(formData: FormData): Promise<{ document: Document; extractedFields?: ExtractedField[] }> {
-  const res = await fetch('/api/documents/upload', {
+  const res = await fetch(apiUrl('/api/documents/upload'), {
     method: 'POST',
     body: formData,
   });
@@ -18,7 +23,7 @@ export async function uploadDocument(formData: FormData): Promise<{ document: Do
 }
 
 export async function processDocument(documentId: string): Promise<{ document: Document; extractedFields: ExtractedField[] }> {
-  const res = await fetch(`/api/documents/${documentId}/process`, {
+  const res = await fetch(apiUrl(`/api/documents/${documentId}/process`), {
     method: 'POST',
   });
   const json = await res.json();
@@ -29,7 +34,7 @@ export async function processDocument(documentId: string): Promise<{ document: D
 }
 
 export async function fetchDocuments(): Promise<Document[]> {
-  const res = await fetch('/api/documents');
+  const res = await fetch(apiUrl('/api/documents'));
   const json = await res.json();
   if (!json.success || !Array.isArray(json.data)) {
     throw new Error(json.error || 'Failed to fetch documents');
@@ -44,7 +49,7 @@ export async function fetchDocumentById(documentId: string): Promise<{
   humanCorrections: any[];
   processingJob?: ProcessingJob | null;
 }> {
-  const res = await fetch(`/api/documents/${documentId}`);
+  const res = await fetch(apiUrl(`/api/documents/${documentId}`));
   const json = await res.json();
   if (!json.success || !json.data) {
     throw new Error(json.error || 'Failed to fetch document details');
@@ -57,7 +62,7 @@ export async function submitVerificationCorrection(
   corrections: Array<{ fieldKey: string; correctedText: string; notes?: string }>,
   userId: string = 'usr-002'
 ): Promise<boolean> {
-  const res = await fetch('/api/verification/correct', {
+  const res = await fetch(apiUrl('/api/verification/correct'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ documentId, corrections, userId }),
@@ -70,7 +75,7 @@ export async function submitVerificationCorrection(
 }
 
 export async function fetchQueue(): Promise<ProcessingJob[]> {
-  const res = await fetch('/api/queue');
+  const res = await fetch(apiUrl('/api/queue'));
   const json = await res.json();
   if (!json.success || !Array.isArray(json.data)) {
     throw new Error(json.error || 'Failed to fetch job queue');
@@ -79,13 +84,13 @@ export async function fetchQueue(): Promise<ProcessingJob[]> {
 }
 
 export async function retryProcessingJob(jobId: string): Promise<void> {
-  const res = await fetch(`/api/queue/${jobId}/retry`, { method: 'POST' });
+  const res = await fetch(apiUrl(`/api/queue/${jobId}/retry`), { method: 'POST' });
   const json = await res.json();
   if (!json.success) throw new Error(json.error || 'Processing retry failed');
 }
 
 export async function fetchAuditLogs(): Promise<AuditLog[]> {
-  const res = await fetch('/api/audit-logs');
+  const res = await fetch(apiUrl('/api/audit-logs'));
   const json = await res.json();
   if (!json.success || !Array.isArray(json.data)) {
     throw new Error(json.error || 'Failed to fetch audit logs');

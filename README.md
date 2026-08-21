@@ -129,3 +129,33 @@ jobs are not processed again.
 
 ## 📌 Environment Constraints & Known Limitations
 - **PostgreSQL Live Persistence**: PostgreSQL or Docker must be available on port `5432`; production will not silently fall back to memory.
+
+## 🚀 Production Deployment
+
+### Local development
+```bash
+npm install
+npm run dev
+```
+
+### Production build
+```bash
+npm run build
+```
+
+### Render
+Create a Render PostgreSQL database and a Node Web Service connected to the
+`development` branch. Use `npm install && npm run build` as the build command,
+`npm start` as the start command, and `/api/health` as the health check path.
+Set `NODE_ENV`, `DATABASE_URL`, `JWT_SECRET_KEY`, `DEMO_ADMIN_EMAIL`,
+`DEMO_ADMIN_PASSWORD`, `OCR_PROVIDER`, `PYTHON_EXECUTABLE`,
+`HANDWRITING_OCR_MODEL`, and `CORS_ORIGIN` in Render's environment settings.
+Run `alembic upgrade head` against the Render PostgreSQL database before the
+service starts. Do not commit database URLs or secrets.
+
+### Netlify
+Connect the `development` branch with build command `npm run build` and
+publish directory `dist`. Set `VITE_API_BASE_URL` to
+`https://YOUR-RENDER-SERVICE.onrender.com` so browser API requests reach the
+Render backend. Configure real secrets only in provider environment settings;
+never commit them to the repository.

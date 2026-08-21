@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiUrl } from '../services/api.ts';
 
 interface User {
   id: string;
@@ -50,7 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const originalFetch = window.fetch.bind(window);
     window.fetch = (input: RequestInfo | URL, init: RequestInit = {}) => {
       const currentToken = localStorage.getItem('tfrenzy_jwt_token');
-      const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const resolvedInput = typeof input === 'string' && input.startsWith('/api/') ? apiUrl(input) : input;
+      const rawUrl = typeof resolvedInput === 'string' ? resolvedInput : resolvedInput instanceof URL ? resolvedInput.toString() : resolvedInput.url;
       const cleanPath = rawUrl.split('?')[0].replace(/\/+$/, '');
       const isPublicEndpoint =
         cleanPath === '/api/auth/login' ||
@@ -77,11 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             init = { ...init, headers: copy };
           }
         }
-        return originalFetch(input, init);
+        return originalFetch(resolvedInput, init);
       }
       const headers = new Headers(init.headers);
       headers.set('Authorization', `Bearer ${currentToken}`);
-      return originalFetch(input, { ...init, headers });
+      return originalFetch(resolvedInput, { ...init, headers });
     };
     return () => { window.fetch = originalFetch; };
   }, []);
