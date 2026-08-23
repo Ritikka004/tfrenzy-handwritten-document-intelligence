@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
+import * as XLSX from 'xlsx';
 import { createServer as createViteServer } from 'vite';
 import { db } from './backend/db/database.ts';
 import { postgresDb } from './backend/db/postgresDatabase.ts';
@@ -1842,7 +1843,7 @@ app.get('/api/datasets/:id/manifest', (req, res) => {
 });
 
 // 8. Export Center API & CSV / Excel Downloads
-app.get('/api/export/download/:format', requireRole('admin', 'supervisor', 'auditor'), async (req, res) => {
+app.get('/api/export/download/:format', requireRole('admin', 'supervisor', 'verifier', 'auditor'), async (req, res) => {
   const { format } = req.params;
   const docs = getActiveDocuments().filter(doc => doc.status === 'verified').map(attachExtractedFieldsToDocument);
   const activeDocumentIds = new Set(docs.map(doc => doc.id));
@@ -1908,29 +1909,33 @@ app.get('/api/export/download/:format', requireRole('admin', 'supervisor', 'audi
 
   if (format === 'excel' || format === 'xlsx') {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename="verified_extracted_data_${Date.now()}.csv"`);
-    
-    let csvContent = 'Document ID,File Name,Field Key,Raw OCR Value,Final Value,Confidence,Is Valid,Is Corrected,Correction User,Correction At,Correction Notes,Status,Uploaded At\n';
+    res.setHeader('Content-Disposition', `attachment; filename="verified_extracted_data_${Date.now()}.xlsx"`);
+
+    const rows: unknown[][] = [['Document ID', 'File Name', 'Field Key', 'Raw OCR Value', 'Final Value', 'Confidence', 'Is Valid', 'Is Corrected', 'Correction User', 'Correction At', 'Correction Notes', 'Status', 'Uploaded At']];
     fields.forEach(f => {
       const doc = docs.find(d => d.id === f.documentId);
       const correction = getLatestHumanCorrection(f.documentId, f.fieldKey);
-      const row = [
-        `"${f.documentId}"`,
-        `"${doc?.fileName || ''}"`,
-        `"${f.fieldKey}"`,
-        `"${(f.ocrValue || '').replace(/"/g, '""')}"`,
-        `"${(f.finalValue || '').replace(/"/g, '""')}"`,
+      rows.push([
+        f.documentId,
+        doc?.fileName || '',
+        f.fieldKey,
+        f.ocrValue || '',
+        f.finalValue || '',
         f.confidence,
         f.isValid,
         f.isCorrected,
-        `"${correction?.correctedBy || ''}"`,
-        `"${correction?.correctedAt || ''}"`,
-        `"${(correction?.notes || '').replace(/"/g, '""')}"`,
-        `"${doc?.status || 'processed'}"`,
-        `"${doc?.uploadedAt || ''}"`
-      ].join(',');
-      csvContent += row + '\n';
+        correction?.correctedBy || '',
+        correction?.correctedAt || '',
+        correction?.notes || '',
+        doc?.status || 'processed',
+        doc?.uploadedAt || ''
+      ]);
     });
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Verified Data');
+    const workbookBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
     db.auditLogs.unshift({
       id: `audit-${Date.now()}`,
@@ -1942,13 +1947,13 @@ app.get('/api/export/download/:format', requireRole('admin', 'supervisor', 'audi
     });
     await postgresDb.insertAuditLog(db.auditLogs[0]);
 
-    return res.status(200).send(csvContent);
+    return res.status(200).send(workbookBuffer);
   }
 
   res.status(400).json({ success: false, error: 'Unsupported format requested. Supported formats: csv, excel, json' });
 });
 
-app.post('/api/export', requireRole('admin', 'supervisor', 'auditor'), async (req, res) => {
+app.post('/api/export', requireRole('admin', 'supervisor', 'verifier', 'auditor'), async (req, res) => {
   const { format, documentIds } = req.body;
   const fmt = (typeof format === 'string' ? format.toLowerCase() : 'csv') as 'csv' | 'excel' | 'json';
   if (!['csv', 'excel', 'json'].includes(fmt)) {

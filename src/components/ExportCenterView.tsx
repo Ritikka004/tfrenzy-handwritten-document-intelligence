@@ -69,6 +69,30 @@ export const ExportCenterView: React.FC = () => {
     return `/api/export/download/${format}`;
   };
 
+  const handleDownload = async (format: string) => {
+    try {
+      const response = await fetch(downloadUrl(format));
+      if (!response.ok) {
+        throw new Error(`Download request failed: ${response.status}`);
+      }
+
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition?.match(/filename="?([^";]+)"?/i)?.[1]
+        || `verified_extracted_data.${format === 'excel' ? 'xlsx' : format}`;
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      showToast('Download failed. Check the server console.');
+    }
+  };
+
   const formatName = (format: string) => {
     switch (format) {
       case 'csv':
@@ -192,6 +216,10 @@ export const ExportCenterView: React.FC = () => {
                 <a
                   href={downloadUrl(job.format)}
                   download
+                  onClick={event => {
+                    event.preventDefault();
+                    void handleDownload(job.format);
+                  }}
                   className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded transition"
                 >
                   Download File
